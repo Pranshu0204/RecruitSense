@@ -1,0 +1,422 @@
+{
+  "Backend Engineer": {
+    "description": "Designs and builds server-side systems, APIs, and data layers.",
+    "core_skills": ["API design", "REST/GraphQL", "Relational databases", "Authentication & authorization", "Caching", "Observability"],
+    "tech_stacks": [
+      {"name": "Python/FastAPI", "skills": ["Python 3.x", "FastAPI", "PostgreSQL", "Redis", "SQLAlchemy", "pytest"]},
+      {"name": "Node/Express", "skills": ["Node.js", "Express", "TypeScript", "Postgres", "Jest", "Prisma"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; builds CRUD endpoints under guidance; basic SQL.",
+      "mid": "2-5 yrs; owns services end-to-end; designs schemas; writes runbooks.",
+      "senior": "5+ yrs; designs distributed systems; mentors; leads architecture reviews."
+    },
+    "common_gaps": ["No production observability experience", "Limited async/concurrency exposure", "Weak on database internals"]
+  },
+  "Frontend Engineer": {
+    "description": "Builds user-facing web interfaces with attention to UX, accessibility, and performance.",
+    "core_skills": ["HTML/CSS", "JavaScript/TypeScript", "Component design", "Accessibility (WCAG)", "Responsive design", "Build tooling"],
+    "tech_stacks": [
+      {"name": "React", "skills": ["React 18+", "TypeScript", "Redux/Zustand", "React Query", "Vite", "Testing Library"]},
+      {"name": "Vue", "skills": ["Vue 3", "Pinia", "Composition API", "Nuxt", "Vitest"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; implements designs from Figma; basic state management.",
+      "mid": "2-5 yrs; owns features; writes reusable components; performance-aware.",
+      "senior": "5+ yrs; sets frontend architecture; design systems; cross-team standards."
+    },
+    "common_gaps": ["No accessibility experience", "Weak on performance profiling", "Limited testing discipline"]
+  },
+  "Full-Stack Engineer": {
+    "description": "Ships complete features across frontend, backend, and infrastructure.",
+    "core_skills": ["Frontend frameworks", "Backend APIs", "Databases", "CI/CD", "Cloud basics", "End-to-end testing"],
+    "tech_stacks": [
+      {"name": "MERN/Next.js", "skills": ["Next.js", "React", "Node", "MongoDB", "Vercel", "Cypress"]},
+      {"name": "Django + React", "skills": ["Django", "DRF", "React", "Postgres", "Docker"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; ships small features end-to-end with help.",
+      "mid": "2-5 yrs; owns features fully; comfortable across the stack.",
+      "senior": "5+ yrs; founder-mode capable; sets technical direction for products."
+    },
+    "common_gaps": ["Spread thin — no real depth", "Weak DevOps fundamentals"]
+  },
+  "Mobile iOS Developer": {
+    "description": "Builds native iOS applications, focusing on UX, battery, and platform conventions.",
+    "core_skills": ["Swift", "SwiftUI/UIKit", "Auto Layout", "Async/await + Combine", "App Store release", "Instruments profiling"],
+    "tech_stacks": [
+      {"name": "Native iOS", "skills": ["Swift 5.x", "SwiftUI", "Combine", "Core Data", "XCTest", "Fastlane"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; builds screens under guidance; basic networking.",
+      "mid": "2-5 yrs; owns features; understands memory & lifecycle.",
+      "senior": "5+ yrs; leads architecture (TCA/Clean), publishes apps, mentors."
+    },
+    "common_gaps": ["No App Store release ownership", "Limited Instruments experience"]
+  },
+  "Mobile Android Developer": {
+    "description": "Builds native Android applications with Kotlin, Jetpack, and modern architecture.",
+    "core_skills": ["Kotlin", "Jetpack Compose", "Coroutines + Flow", "Room", "Play Store release", "Android lifecycle"],
+    "tech_stacks": [
+      {"name": "Native Android", "skills": ["Kotlin", "Jetpack Compose", "Hilt", "Retrofit", "Coroutines", "Espresso"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; builds screens; basic Compose.",
+      "mid": "2-5 yrs; clean architecture; offline-first; CI/CD owner.",
+      "senior": "5+ yrs; modularizes apps; mentors; cross-platform tradeoffs."
+    },
+    "common_gaps": ["Stuck in legacy XML views", "Weak on coroutines/Flow patterns"]
+  },
+  "React Native Developer": {
+    "description": "Builds cross-platform mobile apps in React Native, bridging iOS and Android nuances.",
+    "core_skills": ["React Native", "TypeScript", "Native modules", "Expo", "Performance tuning", "OTA updates"],
+    "tech_stacks": [
+      {"name": "React Native + Expo", "skills": ["React Native 0.7x", "Expo", "TypeScript", "Reanimated", "EAS Build"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; builds screens with Expo.",
+      "mid": "2-5 yrs; bridges native modules; ships to both stores.",
+      "senior": "5+ yrs; new architecture (Fabric/TurboModules); perf-tunes."
+    },
+    "common_gaps": ["No native module experience", "Unfamiliar with new architecture"]
+  },
+  "Data Engineer": {
+    "description": "Builds data pipelines, warehouses, and platforms that power analytics and ML.",
+    "core_skills": ["SQL", "ETL/ELT", "Distributed processing", "Data modeling", "Workflow orchestration", "Data quality"],
+    "tech_stacks": [
+      {"name": "Modern data stack", "skills": ["Airflow", "dbt", "Snowflake/BigQuery", "Spark", "Kafka", "Iceberg"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; writes SQL transforms; runs simple DAGs.",
+      "mid": "2-5 yrs; owns pipelines; partition/cost tuning; data contracts.",
+      "senior": "5+ yrs; designs lakehouse architectures; streaming systems."
+    },
+    "common_gaps": ["Only batch experience", "No data quality framework", "Weak at cost optimization"]
+  },
+  "Data Scientist": {
+    "description": "Frames business problems statistically and ships models or insights to production.",
+    "core_skills": ["Statistics", "Python (pandas/scikit-learn)", "Experimentation (A/B)", "Communication", "SQL", "ML fundamentals"],
+    "tech_stacks": [
+      {"name": "PyData", "skills": ["pandas", "scikit-learn", "statsmodels", "Jupyter", "matplotlib", "Weights & Biases"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; runs analyses with guidance; basic ML.",
+      "mid": "2-5 yrs; designs experiments; productionizes simple models.",
+      "senior": "5+ yrs; sets DS strategy; influences product; mentors."
+    },
+    "common_gaps": ["No production model experience", "Weak experiment design", "Notebook-only — can't write maintainable code"]
+  },
+  "Data Analyst": {
+    "description": "Turns data into decisions via dashboards, ad-hoc analysis, and stakeholder partnership.",
+    "core_skills": ["SQL", "Excel/Sheets", "Visualization (Looker/Tableau)", "Storytelling", "Statistics basics", "Stakeholder mgmt"],
+    "tech_stacks": [
+      {"name": "Analytics", "skills": ["SQL", "Looker/Tableau/PowerBI", "Python (pandas)", "dbt", "Snowflake"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; runs reports; basic SQL.",
+      "mid": "2-5 yrs; partners with PMs; designs metrics; advanced SQL.",
+      "senior": "5+ yrs; builds analytics frameworks; influences org strategy."
+    },
+    "common_gaps": ["Excel-only — weak SQL", "Can't tell a story with data"]
+  },
+  "Analytics Engineer": {
+    "description": "Bridges data engineering and analysis — owns the modeling layer (dbt) for trustworthy data.",
+    "core_skills": ["dbt", "Advanced SQL", "Data modeling (Kimball)", "Testing", "Git workflows", "Documentation"],
+    "tech_stacks": [
+      {"name": "dbt + Cloud DW", "skills": ["dbt Core/Cloud", "Snowflake/BigQuery", "Airflow", "GitHub Actions", "Looker"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; writes simple dbt models.",
+      "mid": "2-5 yrs; owns marts; sets data quality standards.",
+      "senior": "5+ yrs; designs the semantic layer; mentors analysts."
+    },
+    "common_gaps": ["Treats dbt as just SQL templates — no testing/docs"]
+  },
+  "ML Engineer": {
+    "description": "Productionizes machine-learning models — owns training pipelines, serving, and reliability.",
+    "core_skills": ["Python", "PyTorch/TensorFlow", "Model deployment", "Feature engineering", "MLOps basics", "Cloud platforms"],
+    "tech_stacks": [
+      {"name": "PyTorch + AWS", "skills": ["PyTorch", "Hugging Face", "SageMaker", "Docker", "MLflow", "Triton"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; trains baseline models; basic deployment.",
+      "mid": "2-5 yrs; owns end-to-end pipelines; eval frameworks.",
+      "senior": "5+ yrs; designs model platforms; on-call for ML systems."
+    },
+    "common_gaps": ["No production deployment experience", "Notebook-only — can't engineer", "No monitoring/drift handling"]
+  },
+  "MLOps Engineer": {
+    "description": "Builds the platform that lets ML teams train, deploy, and monitor models reliably.",
+    "core_skills": ["Kubernetes", "CI/CD", "Model registries", "Monitoring/drift", "Feature stores", "Data versioning"],
+    "tech_stacks": [
+      {"name": "Cloud-native MLOps", "skills": ["Kubernetes", "Kubeflow/Metaflow", "MLflow", "Feast", "Evidently", "Argo Workflows"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; supports ML infra under guidance.",
+      "mid": "2-5 yrs; owns model deployment platforms; SLOs for inference.",
+      "senior": "5+ yrs; designs ML platforms; cross-team standards."
+    },
+    "common_gaps": ["Strong DevOps but weak ML understanding", "No drift monitoring experience"]
+  },
+  "NLP Engineer": {
+    "description": "Builds language-understanding systems — classification, NER, retrieval, and generation.",
+    "core_skills": ["Transformers", "Tokenization", "Fine-tuning", "Evaluation", "Hugging Face ecosystem", "Linguistics basics"],
+    "tech_stacks": [
+      {"name": "HF + PyTorch", "skills": ["transformers", "datasets", "PEFT", "spaCy", "FAISS", "PyTorch"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; fine-tunes off-the-shelf models.",
+      "mid": "2-5 yrs; owns domain adaptation; eval suites; productionizes.",
+      "senior": "5+ yrs; designs NLP systems; publishes or mentors."
+    },
+    "common_gaps": ["No domain-specific eval discipline", "Treats LLMs as black boxes"]
+  },
+  "Computer Vision Engineer": {
+    "description": "Builds vision systems — detection, segmentation, tracking, multi-sensor fusion.",
+    "core_skills": ["Image processing", "CNNs/ViTs", "Annotation pipelines", "Real-time inference", "OpenCV", "GPU optimization"],
+    "tech_stacks": [
+      {"name": "PyTorch + CV", "skills": ["PyTorch", "OpenCV", "Detectron2/YOLO", "TensorRT", "ONNX", "CUDA"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; trains baseline detectors.",
+      "mid": "2-5 yrs; productionizes; latency budgets; sensor calibration.",
+      "senior": "5+ yrs; designs perception stacks; multi-modal fusion."
+    },
+    "common_gaps": ["No real-time/edge experience", "No annotation pipeline ownership"]
+  },
+  "LLM Engineer": {
+    "description": "Builds applications on top of large language models — RAG, agents, evals, and serving.",
+    "core_skills": ["Prompt engineering", "RAG patterns", "Vector databases", "Agent frameworks", "Evals", "Cost/latency tuning"],
+    "tech_stacks": [
+      {"name": "RAG stack", "skills": ["LangChain/LlamaIndex", "OpenAI/Anthropic APIs", "Qdrant/Weaviate/Pinecone", "FastAPI", "Pydantic"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; builds basic RAG demos.",
+      "mid": "2-5 yrs; productionizes pipelines; evals and observability.",
+      "senior": "5+ yrs; designs agent systems; fine-tunes; cost optimizes."
+    },
+    "common_gaps": ["No eval framework", "Hand-waves on cost/latency", "Has not deployed beyond prototype"]
+  },
+  "AI Research Engineer": {
+    "description": "Bridges research and engineering — implements papers, runs ablations, ships novel methods.",
+    "core_skills": ["Reading research papers", "Distributed training", "Ablations", "PyTorch internals", "Math (linear algebra, prob.)", "Open-source contribution"],
+    "tech_stacks": [
+      {"name": "Research", "skills": ["PyTorch", "DeepSpeed/FSDP", "Weights & Biases", "Slurm", "JAX (sometimes)", "Hugging Face"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; reproduces papers under guidance.",
+      "mid": "2-5 yrs; runs novel experiments; first-author papers possible.",
+      "senior": "5+ yrs; sets research direction; mentors; conference presence."
+    },
+    "common_gaps": ["No engineering rigor — code is throwaway", "Cannot productionize"]
+  },
+  "DevOps Engineer": {
+    "description": "Automates infrastructure, CI/CD, and developer experience.",
+    "core_skills": ["Linux", "Cloud platforms", "Infrastructure-as-code", "CI/CD", "Containers", "Monitoring"],
+    "tech_stacks": [
+      {"name": "Cloud-native", "skills": ["AWS/GCP/Azure", "Terraform", "Kubernetes", "Helm", "ArgoCD", "GitHub Actions"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; runs pipelines; basic cloud.",
+      "mid": "2-5 yrs; owns IaC; manages clusters; DR drills.",
+      "senior": "5+ yrs; platform engineering; cross-team paved roads."
+    },
+    "common_gaps": ["GUI-only cloud experience", "No IaC discipline", "No on-call experience"]
+  },
+  "Site Reliability Engineer": {
+    "description": "Owns reliability — SLOs, on-call, incident response, capacity, and engineering for resilience.",
+    "core_skills": ["SLO engineering", "Incident response", "Observability", "Capacity planning", "Linux internals", "Programming (Go/Python)"],
+    "tech_stacks": [
+      {"name": "Observability", "skills": ["Prometheus", "Grafana", "OpenTelemetry", "PagerDuty", "Loki", "Go"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; on-call shadow; tunes alerts.",
+      "mid": "2-5 yrs; runs incidents; writes postmortems; owns SLOs.",
+      "senior": "5+ yrs; designs reliability programs; cross-team org-level work."
+    },
+    "common_gaps": ["No incident command experience", "Weak on Linux performance"]
+  },
+  "Cloud Architect": {
+    "description": "Designs cloud architectures balancing cost, security, performance, and compliance.",
+    "core_skills": ["AWS/Azure/GCP", "Networking", "Security & IAM", "Cost optimization (FinOps)", "Migration strategy", "Compliance"],
+    "tech_stacks": [
+      {"name": "AWS pro", "skills": ["AWS (multi-service)", "Terraform", "CloudFormation", "AWS SSO", "Control Tower", "Organizations"]}
+    ],
+    "seniority": {
+      "junior": "Rare at this level — usually mid+.",
+      "mid": "5-8 yrs; designs single-account architectures; cost-aware.",
+      "senior": "8+ yrs; multi-account landing zones; regulated industries."
+    },
+    "common_gaps": ["Theoretical only — no large-scale migration experience", "Weak networking depth"]
+  },
+  "Platform Engineer": {
+    "description": "Builds internal developer platforms (IDPs) — paved roads, golden paths, self-service infra.",
+    "core_skills": ["Kubernetes", "Backstage / IDPs", "API design", "Developer experience", "Infrastructure-as-code", "Observability"],
+    "tech_stacks": [
+      {"name": "IDP", "skills": ["Backstage", "Crossplane", "ArgoCD", "Kubernetes", "Go", "Terraform"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; contributes to platform tooling.",
+      "mid": "2-5 yrs; owns platform components; runs office hours.",
+      "senior": "5+ yrs; product mindset for the platform; org-wide adoption."
+    },
+    "common_gaps": ["Treats platform as project, not product"]
+  },
+  "Security Engineer": {
+    "description": "Embeds security into systems — appsec, infrastructure hardening, and incident response.",
+    "core_skills": ["OWASP Top 10", "Threat modeling", "SAST/DAST", "Cloud security", "Cryptography basics", "Linux/network"],
+    "tech_stacks": [
+      {"name": "AppSec", "skills": ["Burp Suite", "Semgrep", "Snyk", "AWS IAM", "Wiz/Prisma Cloud", "Python"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; runs scanners; triages findings.",
+      "mid": "2-5 yrs; owns appsec program; threat models products.",
+      "senior": "5+ yrs; sets security strategy; incident command."
+    },
+    "common_gaps": ["Compliance-checkbox mindset", "No real exploit understanding"]
+  },
+  "Penetration Tester": {
+    "description": "Performs authorized offensive security testing to find vulnerabilities before attackers do.",
+    "core_skills": ["Web app pentesting", "Network pentesting", "Reporting", "Tooling", "Ethics & scoping", "Reverse engineering basics"],
+    "tech_stacks": [
+      {"name": "Offensive", "skills": ["Burp Suite", "Metasploit", "nmap", "Kali Linux", "Bash/Python scripting", "Active Directory"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; web app testing under guidance.",
+      "mid": "2-5 yrs; leads engagements; OSCP-level skills.",
+      "senior": "5+ yrs; red team ops; advanced certs (OSEP, GXPN)."
+    },
+    "common_gaps": ["Cert-only — no real engagement experience", "Weak reporting"]
+  },
+  "Database Administrator": {
+    "description": "Owns the operational health of databases — performance, availability, backups, security.",
+    "core_skills": ["SQL tuning", "Replication", "Backup/restore", "Schema design", "Capacity planning", "On-call"],
+    "tech_stacks": [
+      {"name": "Postgres + MySQL", "skills": ["PostgreSQL", "MySQL", "pgBouncer", "pg_dump/pg_basebackup", "Patroni", "Datadog"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; runs backups; basic tuning.",
+      "mid": "2-5 yrs; replication topologies; query plan analysis.",
+      "senior": "5+ yrs; tier-1 systems; cross-DB consolidation."
+    },
+    "common_gaps": ["No HA experience", "Weak query plan reading"]
+  },
+  "QA Engineer": {
+    "description": "Validates quality through manual and exploratory testing, bug reproduction, and process.",
+    "core_skills": ["Test case design", "Exploratory testing", "Bug reporting", "API testing (Postman)", "Regression discipline", "JIRA"],
+    "tech_stacks": [
+      {"name": "Manual + light automation", "skills": ["Postman", "JIRA", "Selenium IDE", "TestRail", "Jenkins"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; runs test cases; logs bugs.",
+      "mid": "2-5 yrs; designs test plans; risk-based testing.",
+      "senior": "5+ yrs; QA strategy across teams; mentors automation engineers."
+    },
+    "common_gaps": ["No automation literacy", "Treats QA as gatekeeping not enabling"]
+  },
+  "Test Automation Engineer": {
+    "description": "Designs and maintains automated test suites at unit, integration, and E2E levels.",
+    "core_skills": ["Test pyramid", "Selenium/Playwright/Cypress", "API testing", "Contract testing", "CI integration", "Programming"],
+    "tech_stacks": [
+      {"name": "Modern automation", "skills": ["Playwright", "pytest", "Pact", "GitHub Actions", "Allure", "Docker"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; writes basic UI tests.",
+      "mid": "2-5 yrs; owns test pyramid; perf testing.",
+      "senior": "5+ yrs; sets automation strategy; coaches dev teams."
+    },
+    "common_gaps": ["UI-only — no API/contract testing", "Flaky tests, no debugging discipline"]
+  },
+  "Embedded Systems Engineer": {
+    "description": "Builds firmware and embedded software for resource-constrained devices.",
+    "core_skills": ["C/C++", "RTOS", "Hardware interfaces (SPI/I2C/UART)", "Low-power design", "Debugging (JTAG)", "Driver development"],
+    "tech_stacks": [
+      {"name": "ARM + RTOS", "skills": ["C", "C++", "FreeRTOS", "ARM Cortex-M", "STM32 / nRF", "Bluetooth LE"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; writes drivers under guidance.",
+      "mid": "2-5 yrs; owns firmware modules; bring-up; debug.",
+      "senior": "5+ yrs; system architecture; HW/SW co-design."
+    },
+    "common_gaps": ["Only Arduino-level experience", "No JTAG/SWD debugging"]
+  },
+  "Game Developer": {
+    "description": "Builds interactive game experiences — gameplay programming, engines, and tools.",
+    "core_skills": ["C++/C#", "Game engine (Unity/Unreal)", "3D math", "Rendering basics", "Performance profiling", "Version control (Perforce)"],
+    "tech_stacks": [
+      {"name": "Unity", "skills": ["C#", "Unity 2022+", "Shader Graph", "Addressables", "DOTS/ECS", "Plastic SCM"]},
+      {"name": "Unreal", "skills": ["C++", "Unreal Engine 5", "Blueprints", "Niagara", "Perforce"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; gameplay scripting under guidance.",
+      "mid": "2-5 yrs; owns systems; performance budgets.",
+      "senior": "5+ yrs; tech lead; engine internals; multi-platform."
+    },
+    "common_gaps": ["Hobby projects only — no shipped title"]
+  },
+  "Blockchain Engineer": {
+    "description": "Builds decentralized applications, smart contracts, and on-chain protocols.",
+    "core_skills": ["Solidity / Rust", "EVM internals", "Cryptography basics", "Security mindset", "Web3 SDKs", "Auditing patterns"],
+    "tech_stacks": [
+      {"name": "EVM (Solidity)", "skills": ["Solidity", "Foundry/Hardhat", "ethers.js", "OpenZeppelin", "TheGraph", "IPFS"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; writes simple contracts.",
+      "mid": "2-5 yrs; ships audited protocols; gas optimization.",
+      "senior": "5+ yrs; protocol architecture; pre-audit reviews; mentor."
+    },
+    "common_gaps": ["No security review discipline", "No audit experience"]
+  },
+  "Solutions Architect": {
+    "description": "Designs end-to-end technical solutions for clients, balancing requirements and constraints.",
+    "core_skills": ["Architecture patterns", "Cloud expertise", "Stakeholder management", "Cost analysis", "Compliance/regulatory", "Communication"],
+    "tech_stacks": [
+      {"name": "Multi-cloud", "skills": ["AWS Solutions Architect Pro", "Azure Architect", "Terraform", "Kafka", "Kubernetes"]}
+    ],
+    "seniority": {
+      "junior": "Rare at this level.",
+      "mid": "5-8 yrs; owns mid-size solution designs.",
+      "senior": "8+ yrs; presales + delivery; multi-region; enterprise customers."
+    },
+    "common_gaps": ["Diagrams only — no implementation depth", "Weak stakeholder communication"]
+  },
+  "Engineering Manager": {
+    "description": "Leads software engineering teams — people management, delivery, and technical direction.",
+    "core_skills": ["1:1s & coaching", "Performance management", "Hiring", "Delivery planning", "Technical credibility", "Cross-functional partnership"],
+    "tech_stacks": [
+      {"name": "Management", "skills": ["JIRA/Linear", "OKR frameworks", "Agile/Scrum", "Roadmapping", "Career laddering"]}
+    ],
+    "seniority": {
+      "junior": "Rare — usually 5+ IC yrs first.",
+      "mid": "7+ yrs IC + 2+ yrs mgmt; leads single team.",
+      "senior": "10+ yrs; leads multiple teams; org strategy."
+    },
+    "common_gaps": ["Pure project manager — lacks technical depth", "No hiring bar experience"]
+  },
+  "Technical Product Manager": {
+    "description": "Owns product roadmap with deep technical fluency — common in API, infra, and developer tools.",
+    "core_skills": ["Roadmapping", "User research", "API/system fluency", "Metrics", "Stakeholder mgmt", "Writing"],
+    "tech_stacks": [
+      {"name": "PM toolkit", "skills": ["Amplitude/Mixpanel", "Figma", "JIRA", "SQL", "Notion/Linear"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; APM programs; small features.",
+      "mid": "2-5 yrs; owns a product area; metrics-driven.",
+      "senior": "5+ yrs; sets product strategy; multi-team."
+    },
+    "common_gaps": ["No technical depth — can't engage engineers", "Roadmap-only — no metrics rigor"]
+  },
+  "Developer Relations Engineer": {
+    "description": "Bridges developers and the product — content, talks, open-source, and community.",
+    "core_skills": ["Writing", "Public speaking", "Sample-app building", "Community management", "Empathy for developers", "Programming"],
+    "tech_stacks": [
+      {"name": "DevRel", "skills": ["Markdown / docs", "GitHub", "Open-source contribution", "Conference speaking", "Video production"]}
+    ],
+    "seniority": {
+      "junior": "0-2 yrs; writes tutorials; small talks.",
+      "mid": "2-5 yrs; owns conference strategy; flagship content.",
+      "senior": "5+ yrs; sets DevRel strategy; community lead; cross-org."
+    },
+    "common_gaps": ["No engineering background — content lacks depth", "Marketing-only voice"]
+  }
+}

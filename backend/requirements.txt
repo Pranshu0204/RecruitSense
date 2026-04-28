@@ -1,0 +1,37 @@
+# --- API ---
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+python-multipart==0.0.17
+
+# --- Data validation / config ---
+pydantic==2.9.2
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+# --- LLM orchestration ---
+langchain==0.3.7
+langchain-core==0.3.15
+langchain-openai==0.2.6
+langchain-community==0.3.5
+langgraph==0.2.45
+
+# --- RAG / vector store / embeddings ---
+qdrant-client==1.12.1
+sentence-transformers==3.2.1
+torch>=2.4.0
+
+# --- Document parsing ---
+PyMuPDF==1.24.13
+
+# --- Caching ---
+redis==5.2.0
+
+# --- HTTP / utility ---
+httpx==0.27.2
+tenacity==9.0.0
+structlog==24.4.0
+
+# --- Dev ---
+ruff==0.7.2
+pytest==8.3.3
+pytest-asyncio==0.24.0

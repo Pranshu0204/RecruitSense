@@ -1,0 +1,21 @@
+# --- Core training stack ---
+transformers==4.46.2
+peft==0.13.2
+trl==0.12.1
+accelerate==1.1.1
+datasets==3.1.0
+sentencepiece==0.2.0
+torch>=2.4.0
+
+# --- Experiment tracking ---
+mlflow==2.17.2
+
+# --- Evaluation metrics ---
+evaluate==0.4.3
+rouge-score==0.1.2
+sacrebleu==2.4.3
+
+# --- 4-bit quantization (CUDA only) ---
+# bitsandbytes only supports CUDA. On macOS (MPS) or CPU, the train script
+# auto-falls back to fp16/bf16 without 4-bit quant. Uncomment on a CUDA host.
+# bitsandbytes==0.44.1

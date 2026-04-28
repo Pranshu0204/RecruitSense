@@ -1,0 +1,67 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+.env
+*.env.local
+finetune/outputs/
+finetune/runs/
+finetune/dataset/data/
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+mlruns/
+mlartifacts/
+qdrant_storage/
+redis_data/
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Hugging Face cache
+.cache/
+hf_cache/
+
+# Docker
+docker-compose.override.yml
+
+
+# Local test artifacts
+test_resume.pdf
+*_resume.pdf

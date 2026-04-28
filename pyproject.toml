@@ -1,0 +1,54 @@
+# Tool config only — RecruitSense is not packaged as a wheel. Dependencies
+# live in `backend/requirements.txt`, `frontend/requirements.txt`, and
+# `finetune/requirements.txt` (each environment installs only what it needs).
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = [
+    ".venv",
+    "build",
+    "dist",
+    "finetune/runs",
+    "finetune/dataset/data",
+    "mlruns",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",   # line length is enforced by formatter, not linter
+    "B008",   # FastAPI uses `Depends()` / `File()` defaults intentionally
+    "RUF012", # mutable class attrs are common in Pydantic models
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011", "SIM117"]  # asserts and nested with-blocks are fine in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:pydantic.*",
+    "ignore::PendingDeprecationWarning",
+]

@@ -1,0 +1,48 @@
+# Build artifacts and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Environments
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Git
+.git/
+.github/
+.gitignore
+
+# Tests, docs, dev
+tests/
+README.md
+*.md
+!finetune/dataset/README.md
+
+# Heavy ML artifacts that shouldn't bake into images
+finetune/runs/
+finetune/dataset/data/
+mlruns/
+*.ckpt
+*.bin
+*.safetensors
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
