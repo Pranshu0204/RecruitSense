@@ -154,20 +154,15 @@ async def score_resume(
         )
     except Exception as exc:
         logger.warning("scorer_llm_failed", reason=str(exc))
-        return _make_fallback_score(
-            parsed_resume.candidate_name, model_used, str(exc), bias_flags
-        )
+        return _make_fallback_score(parsed_resume.candidate_name, model_used, str(exc), bias_flags)
 
     try:
         dim_scores = {
-            name: DimensionScore(**raw["dimension_scores"][name])
-            for name in DIMENSION_NAMES
+            name: DimensionScore(**raw["dimension_scores"][name]) for name in DIMENSION_NAMES
         }
     except (KeyError, TypeError, ValueError) as exc:
         logger.warning("scorer_dimension_parse_failed", reason=str(exc))
-        return _make_fallback_score(
-            parsed_resume.candidate_name, model_used, str(exc), bias_flags
-        )
+        return _make_fallback_score(parsed_resume.candidate_name, model_used, str(exc), bias_flags)
 
     composite = composite_from_dimensions(dim_scores)
     tier = tier_from_composite(composite)

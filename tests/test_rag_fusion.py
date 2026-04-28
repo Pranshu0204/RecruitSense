@@ -47,7 +47,14 @@ def test_rrf_dedupes_by_text() -> None:
 
 @pytest.mark.parametrize(
     ("years", "expected"),
-    [(0.0, "junior"), (1.5, "junior"), (2.0, "mid"), (4.9, "mid"), (5.0, "senior"), (10.0, "senior")],
+    [
+        (0.0, "junior"),
+        (1.5, "junior"),
+        (2.0, "mid"),
+        (4.9, "mid"),
+        (5.0, "senior"),
+        (10.0, "senior"),
+    ],
 )
 def test_infer_seniority(years: float, expected: str) -> None:
     assert infer_seniority(years) == expected

@@ -62,9 +62,7 @@ def _file_failure_score(filename: str, error: str) -> ScoreOutput:
 @router.post("/batch", response_model=BatchResult)
 async def batch_screen(
     jd_json: str = Form(..., description="JSON-serialized JDInput"),
-    resumes: list[UploadFile] = File(
-        ..., description=f"Up to {MAX_BATCH_SIZE} resume PDFs"
-    ),
+    resumes: list[UploadFile] = File(..., description=f"Up to {MAX_BATCH_SIZE} resume PDFs"),
 ) -> BatchResult:
     """Screen many resumes against a single JD; returns a ranked leaderboard."""
     try:
@@ -95,16 +93,12 @@ async def batch_screen(
                 return await run_pipeline(jd, text)
             except PDFParseError as exc:
                 return _file_failure_score(filename, str(exc))
-            except Exception as exc:  # noqa: BLE001 — never let one resume break the batch
-                logger.warning(
-                    "batch_resume_failed", filename=filename, reason=str(exc)
-                )
+            except Exception as exc:
+                logger.warning("batch_resume_failed", filename=filename, reason=str(exc))
                 return _file_failure_score(filename, str(exc))
 
     start = time.perf_counter()
-    results: list[ScoreOutput] = await asyncio.gather(
-        *[_screen_one(r) for r in resumes]
-    )
+    results: list[ScoreOutput] = await asyncio.gather(*[_screen_one(r) for r in resumes])
     elapsed = time.perf_counter() - start
 
     results.sort(key=lambda r: r.composite_score, reverse=True)

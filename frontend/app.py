@@ -164,9 +164,7 @@ def render_jd_form(key_prefix: str) -> dict[str, Any] | None:
                 key=f"{key_prefix}_edu",
             )
 
-        submitted = st.form_submit_button(
-            "Screen", type="primary", use_container_width=True
-        )
+        submitted = st.form_submit_button("Screen", type="primary", use_container_width=True)
 
     if not submitted:
         return None
@@ -345,26 +343,22 @@ def _dimension_bars(dim_scores: dict[str, dict[str, Any]]) -> go.Figure:
 # --- API client --------------------------------------------------------------
 
 
-def call_screen(api_url: str, jd: dict[str, Any], pdf_bytes: bytes, filename: str) -> dict[str, Any]:
+def call_screen(
+    api_url: str, jd: dict[str, Any], pdf_bytes: bytes, filename: str
+) -> dict[str, Any]:
     """POST one resume to the backend ``/screen`` endpoint."""
     files = {"resume": (filename, pdf_bytes, "application/pdf")}
     data = {"jd_json": json.dumps(jd)}
-    resp = httpx.post(
-        f"{api_url}/screen", data=data, files=files, timeout=REQUEST_TIMEOUT_SECONDS
-    )
+    resp = httpx.post(f"{api_url}/screen", data=data, files=files, timeout=REQUEST_TIMEOUT_SECONDS)
     resp.raise_for_status()
     return resp.json()
 
 
-def call_batch(
-    api_url: str, jd: dict[str, Any], pdfs: list[tuple[str, bytes]]
-) -> dict[str, Any]:
+def call_batch(api_url: str, jd: dict[str, Any], pdfs: list[tuple[str, bytes]]) -> dict[str, Any]:
     """POST many resumes to the backend ``/batch`` endpoint."""
     files = [("resumes", (name, content, "application/pdf")) for name, content in pdfs]
     data = {"jd_json": json.dumps(jd)}
-    resp = httpx.post(
-        f"{api_url}/batch", data=data, files=files, timeout=REQUEST_TIMEOUT_SECONDS
-    )
+    resp = httpx.post(f"{api_url}/batch", data=data, files=files, timeout=REQUEST_TIMEOUT_SECONDS)
     resp.raise_for_status()
     return resp.json()
 

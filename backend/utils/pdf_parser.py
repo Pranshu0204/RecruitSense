@@ -34,7 +34,7 @@ def extract_text_from_pdf(source: str | Path | bytes) -> str:
             text (commonly the case for scanned/image-only PDFs).
     """
     try:
-        if isinstance(source, (str, Path)):
+        if isinstance(source, str | Path):
             doc = fitz.open(str(source))
         else:
             doc = fitz.open(stream=source, filetype="pdf")

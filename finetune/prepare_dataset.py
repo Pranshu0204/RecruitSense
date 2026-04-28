@@ -74,14 +74,58 @@ JD_TEMPLATES = [
 
 # Coarse keyword sets per common category. Used to score skills_match.
 CATEGORY_KEYWORDS: dict[str, list[str]] = {
-    "Data Science": ["python", "pandas", "scikit-learn", "tensorflow", "pytorch", "sql", "ml", "statistics"],
-    "DevOps Engineer": ["docker", "kubernetes", "terraform", "aws", "ci/cd", "linux", "ansible", "jenkins"],
+    "Data Science": [
+        "python",
+        "pandas",
+        "scikit-learn",
+        "tensorflow",
+        "pytorch",
+        "sql",
+        "ml",
+        "statistics",
+    ],
+    "DevOps Engineer": [
+        "docker",
+        "kubernetes",
+        "terraform",
+        "aws",
+        "ci/cd",
+        "linux",
+        "ansible",
+        "jenkins",
+    ],
     "Web Designing": ["html", "css", "javascript", "figma", "adobe", "ui", "ux", "responsive"],
-    "Java Developer": ["java", "spring", "hibernate", "maven", "junit", "rest", "microservices", "jvm"],
+    "Java Developer": [
+        "java",
+        "spring",
+        "hibernate",
+        "maven",
+        "junit",
+        "rest",
+        "microservices",
+        "jvm",
+    ],
     "Python Developer": ["python", "django", "flask", "fastapi", "rest", "sql", "celery", "pytest"],
     "Web Developer": ["javascript", "react", "node", "html", "css", "rest", "git", "typescript"],
-    "Network Security Engineer": ["firewall", "vpn", "ids", "ips", "siem", "tcp", "linux", "wireshark"],
-    "Mechanical Engineer": ["solidworks", "autocad", "ansys", "matlab", "cad", "fea", "manufacturing"],
+    "Network Security Engineer": [
+        "firewall",
+        "vpn",
+        "ids",
+        "ips",
+        "siem",
+        "tcp",
+        "linux",
+        "wireshark",
+    ],
+    "Mechanical Engineer": [
+        "solidworks",
+        "autocad",
+        "ansys",
+        "matlab",
+        "cad",
+        "fea",
+        "manufacturing",
+    ],
     "Civil Engineer": ["autocad", "staad", "revit", "structural", "concrete", "construction"],
     "Electrical Engineer": ["matlab", "plc", "scada", "circuit", "autocad", "embedded"],
 }
@@ -132,14 +176,21 @@ def synthesize_target(resume_text: str, category: str, rng: random.Random) -> di
     coverage = _coverage(resume_text, keywords)
     years = _years_of_experience(resume_text)
     has_degree = _has_any(
-        resume_text, ["b.tech", "bachelor", "b.e.", "btech", "bsc", "ba ", "ms ", "m.tech", "msc", "mba", "phd"]
+        resume_text,
+        ["b.tech", "bachelor", "b.e.", "btech", "bsc", "ba ", "ms ", "m.tech", "msc", "mba", "phd"],
     )
     has_certs = _has_any(resume_text, ["certified", "certificate", "certification"])
-    has_projects = _has_any(resume_text, ["project", "built", "developed", "designed", "implemented"])
+    has_projects = _has_any(
+        resume_text, ["project", "built", "developed", "designed", "implemented"]
+    )
 
     # 0–10 scaled scores
     skills = round(min(10.0, coverage * 10.0 + rng.uniform(-0.5, 0.5)), 2)
-    exp = round(min(10.0, years * 1.2 + rng.uniform(-0.5, 1.0) + 3.0), 2) if years else round(rng.uniform(3.0, 5.5), 2)
+    exp = (
+        round(min(10.0, years * 1.2 + rng.uniform(-0.5, 1.0) + 3.0), 2)
+        if years
+        else round(rng.uniform(3.0, 5.5), 2)
+    )
     edu = round(rng.uniform(7.0, 9.5) if has_degree else rng.uniform(3.0, 6.0), 2)
     if has_certs:
         edu = round(min(10.0, edu + 0.7), 2)
@@ -157,14 +208,16 @@ def synthesize_target(resume_text: str, category: str, rng: random.Random) -> di
         "experience_relevance": {
             "score": exp,
             "rationale": (
-                f"Detected ~{int(years)} years of relevant experience" if years
+                f"Detected ~{int(years)} years of relevant experience"
+                if years
                 else "Years-of-experience signal not explicitly stated; inferred from role descriptions."
             ),
         },
         "education_and_certs": {
             "score": edu,
             "rationale": (
-                "Holds a recognized degree" + (" with relevant certifications." if has_certs else ".")
+                "Holds a recognized degree"
+                + (" with relevant certifications." if has_certs else ".")
                 if has_degree
                 else "No clearly stated degree or certifications detected."
             ),
@@ -266,9 +319,7 @@ def _detect_columns(ds) -> tuple[str, str]:
         (c for c in ("Resume", "resume", "Resume_str", "Resume_text", "text") if c in cols),
         None,
     )
-    cat_col = next(
-        (c for c in ("Category", "category", "label", "Job_Title") if c in cols), None
-    )
+    cat_col = next((c for c in ("Category", "category", "label", "Job_Title") if c in cols), None)
     if resume_col is None:
         raise ValueError(f"Could not find a resume-text column in {sorted(cols)}")
     return resume_col, cat_col or resume_col

@@ -208,9 +208,7 @@ def _flatten_taxonomy(taxonomy: dict[str, Any]) -> list[dict[str, Any]]:
             f"Tech stacks: "
             f"{', '.join(s.get('name', '') for s in info.get('tech_stacks', []))}"
         )
-        docs.append(
-            {"text": overview, "metadata": {"role": role, "type": "role_overview"}}
-        )
+        docs.append({"text": overview, "metadata": {"role": role, "type": "role_overview"}})
 
         # Per-tech-stack
         for stack in info.get("tech_stacks", []):

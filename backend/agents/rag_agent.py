@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from typing import Any
 
 from backend.agents import get_llm
 from backend.core.prompts import RAG_SUBQUERY_PROMPT
@@ -78,10 +77,7 @@ async def _generate_subqueries(job_title: str, seniority: str, industry: str) ->
     )
     response = await llm.ainvoke(prompt)
     raw_lines = str(response.content).splitlines()
-    queries = [
-        line.strip(" -•\t").lstrip("0123456789. ").strip()
-        for line in raw_lines
-    ]
+    queries = [line.strip(" -•\t").lstrip("0123456789. ").strip() for line in raw_lines]
     queries = [q for q in queries if q]
     return queries[:3]
 
@@ -131,7 +127,7 @@ async def _retrieve_one(query: str, store: QdrantStore, k: int) -> list[Retrieve
 
 async def retrieve_context(
     jd: JDInput,
-    parsed_resume: ParsedResume | None = None,  # noqa: ARG001 — kept for future signal use
+    parsed_resume: ParsedResume | None = None,
     top_k: int = 5,
 ) -> tuple[str, list[RetrievedChunk]]:
     """Run the full RAG-Fusion pipeline for a single JD.
@@ -169,8 +165,11 @@ async def retrieve_context(
     fused = reciprocal_rank_fusion(results_per_query)[:top_k]
     formatted = "\n\n---\n\n".join(f"[score={c.score:.3f}] {c.text}" for c in fused)
     logger.info(
-        "rag_retrieved", n_subqueries=len(subqueries), n_returned=len(fused),
-        seniority=seniority, industry=industry,
+        "rag_retrieved",
+        n_subqueries=len(subqueries),
+        n_returned=len(fused),
+        seniority=seniority,
+        industry=industry,
     )
     return formatted, fused
 

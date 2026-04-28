@@ -27,8 +27,16 @@ def test_dimension_weights_sum_to_one() -> None:
 
 @pytest.mark.parametrize(
     ("score", "expected"),
-    [(95.0, Tier.A), (85.0, Tier.A), (84.99, Tier.B), (70.0, Tier.B),
-     (69.99, Tier.C), (55.0, Tier.C), (54.99, Tier.D), (0.0, Tier.D)],
+    [
+        (95.0, Tier.A),
+        (85.0, Tier.A),
+        (84.99, Tier.B),
+        (70.0, Tier.B),
+        (69.99, Tier.C),
+        (55.0, Tier.C),
+        (54.99, Tier.D),
+        (0.0, Tier.D),
+    ],
 )
 def test_tier_from_composite_thresholds(score: float, expected: Tier) -> None:
     """Tier boundaries: A>=85, B>=70, C>=55, else D."""

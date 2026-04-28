@@ -33,7 +33,7 @@ import argparse
 import importlib.util
 import json
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import torch
@@ -55,8 +55,13 @@ RUNS_DIR = Path("finetune/runs")
 # decoder-only models share these names; if a target is missing, PEFT silently
 # skips it.
 DEFAULT_TARGET_MODULES = [
-    "q_proj", "k_proj", "v_proj", "o_proj",
-    "gate_proj", "up_proj", "down_proj",
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj",
+    "gate_proj",
+    "up_proj",
+    "down_proj",
 ]
 
 
@@ -175,7 +180,7 @@ def main() -> None:
     bnb = _bnb_available()
     logger.info("device_detected", device=device, dtype=str(dtype), bitsandbytes=bnb)
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     output_dir = Path(args.output_dir or RUNS_DIR / timestamp)
     output_dir.mkdir(parents=True, exist_ok=True)
     logger.info("output_dir", path=str(output_dir))
@@ -254,9 +259,7 @@ def main() -> None:
 
         metrics = dict(train_result.metrics)
         metrics["train_duration_s"] = duration
-        mlflow_utils.log_metrics(
-            {k: v for k, v in metrics.items() if isinstance(v, (int, float))}
-        )
+        mlflow_utils.log_metrics({k: v for k, v in metrics.items() if isinstance(v, int | float)})
 
         # Save the LoRA adapter + tokenizer + a small run manifest.
         adapter_dir = output_dir / "adapter"
@@ -270,7 +273,7 @@ def main() -> None:
             "bitsandbytes": bnb,
             "lora": {"r": args.lora_rank, "alpha": args.lora_alpha, "dropout": args.lora_dropout},
             "metrics": metrics,
-            "completed_at": datetime.now(timezone.utc).isoformat(),
+            "completed_at": datetime.now(UTC).isoformat(),
         }
         (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2))
         mlflow_utils.log_artifact(adapter_dir)

@@ -20,25 +20,92 @@ logger = get_logger(__name__)
 
 # --- Gender-coded vocabulary (Gaucher & Friesen-style) -----------------------
 
-MASCULINE_CODED: frozenset[str] = frozenset({
-    "active", "adventurous", "aggressive", "ambitious", "analytical", "assertive",
-    "athletic", "autonomous", "boast", "challenging", "competitive", "confident",
-    "courageous", "decide", "decisive", "determined", "dominant", "driven",
-    "fearless", "force", "headstrong", "hostile", "independent", "individual",
-    "intellectual", "lead", "logical", "objective", "outspoken", "principled",
-    "rugged", "self-confident", "self-reliant", "self-sufficient", "stubborn",
-    "superior", "unreasonable",
-})
+MASCULINE_CODED: frozenset[str] = frozenset(
+    {
+        "active",
+        "adventurous",
+        "aggressive",
+        "ambitious",
+        "analytical",
+        "assertive",
+        "athletic",
+        "autonomous",
+        "boast",
+        "challenging",
+        "competitive",
+        "confident",
+        "courageous",
+        "decide",
+        "decisive",
+        "determined",
+        "dominant",
+        "driven",
+        "fearless",
+        "force",
+        "headstrong",
+        "hostile",
+        "independent",
+        "individual",
+        "intellectual",
+        "lead",
+        "logical",
+        "objective",
+        "outspoken",
+        "principled",
+        "rugged",
+        "self-confident",
+        "self-reliant",
+        "self-sufficient",
+        "stubborn",
+        "superior",
+        "unreasonable",
+    }
+)
 
-FEMININE_CODED: frozenset[str] = frozenset({
-    "agree", "affectionate", "cheer", "collaborative", "committed", "communal",
-    "compassionate", "connect", "considerate", "cooperative", "depend",
-    "emotional", "empathetic", "feel", "flatter", "gentle", "honest",
-    "interpersonal", "interdependent", "kind", "kinship", "loyal", "modesty",
-    "nag", "nurturing", "pleasant", "polite", "quiet", "responsible",
-    "sensitive", "submissive", "support", "sympathetic", "tender", "together",
-    "trust", "understanding", "warm", "whine", "yield",
-})
+FEMININE_CODED: frozenset[str] = frozenset(
+    {
+        "agree",
+        "affectionate",
+        "cheer",
+        "collaborative",
+        "committed",
+        "communal",
+        "compassionate",
+        "connect",
+        "considerate",
+        "cooperative",
+        "depend",
+        "emotional",
+        "empathetic",
+        "feel",
+        "flatter",
+        "gentle",
+        "honest",
+        "interpersonal",
+        "interdependent",
+        "kind",
+        "kinship",
+        "loyal",
+        "modesty",
+        "nag",
+        "nurturing",
+        "pleasant",
+        "polite",
+        "quiet",
+        "responsible",
+        "sensitive",
+        "submissive",
+        "support",
+        "sympathetic",
+        "tender",
+        "together",
+        "trust",
+        "understanding",
+        "warm",
+        "whine",
+        "yield",
+    }
+)
 
 
 # --- Personal-info regexes / keyword lists -----------------------------------
@@ -53,17 +120,28 @@ _GRAD_YEAR_REGEX = re.compile(
     re.IGNORECASE,
 )
 _DOB_REGEX = re.compile(r"\bdate of birth\b|\bd\.?o\.?b\.?\b|\bborn:?\s*\d", re.IGNORECASE)
-_GENDER_REGEX = re.compile(
-    r"\bgender\s*[:\-]\s*(?:male|female|m|f|man|woman)\b", re.IGNORECASE
-)
+_GENDER_REGEX = re.compile(r"\bgender\s*[:\-]\s*(?:male|female|m|f|man|woman)\b", re.IGNORECASE)
 
-_PHOTO_KEYWORDS: tuple[str, ...] = ("headshot", "photograph attached", "photo attached", "picture attached")
+_PHOTO_KEYWORDS: tuple[str, ...] = (
+    "headshot",
+    "photograph attached",
+    "photo attached",
+    "picture attached",
+)
 _MARITAL_KEYWORDS: tuple[str, ...] = ("married", "single", "divorced", "marital status")
 _RELIGION_KEYWORDS: tuple[str, ...] = (
-    "christian", "muslim", "hindu", "jewish", "buddhist", "atheist", "religion:",
+    "christian",
+    "muslim",
+    "hindu",
+    "jewish",
+    "buddhist",
+    "atheist",
+    "religion:",
 )
 _NATIONALITY_KEYWORDS: tuple[str, ...] = (
-    "nationality:", "citizenship:", "country of origin:",
+    "nationality:",
+    "citizenship:",
+    "country of origin:",
 )
 
 
@@ -93,13 +171,11 @@ def detect_bias_signals(text: str) -> list[str]:
     fem_hits = words & FEMININE_CODED
     if len(masc_hits) >= 3 and len(masc_hits) > len(fem_hits) * 2:
         flags.append(
-            f"Heavy masculine-coded language ({len(masc_hits)} terms) — "
-            "may bias readers."
+            f"Heavy masculine-coded language ({len(masc_hits)} terms) — " "may bias readers."
         )
     if len(fem_hits) >= 3 and len(fem_hits) > len(masc_hits) * 2:
         flags.append(
-            f"Heavy feminine-coded language ({len(fem_hits)} terms) — "
-            "may bias readers."
+            f"Heavy feminine-coded language ({len(fem_hits)} terms) — " "may bias readers."
         )
 
     if _DOB_REGEX.search(text):

@@ -14,8 +14,9 @@ from __future__ import annotations
 
 import contextlib
 import os
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import mlflow
 
@@ -68,9 +69,7 @@ def log_metrics(metrics: dict[str, float], step: int | None = None) -> None:
     if mlflow.active_run() is None:
         return
     try:
-        mlflow.log_metrics(
-            {k: float(v) for k, v in metrics.items() if v is not None}, step=step
-        )
+        mlflow.log_metrics({k: float(v) for k, v in metrics.items() if v is not None}, step=step)
     except Exception as exc:
         logger.warning("mlflow_log_metrics_failed", reason=str(exc))
 

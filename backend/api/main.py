@@ -13,8 +13,8 @@ Run with::
 from __future__ import annotations
 
 import time
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -83,9 +83,7 @@ async def log_requests(request: Request, call_next):
             duration_ms=round(duration_ms, 1),
             error=str(exc),
         )
-        return JSONResponse(
-            status_code=500, content={"detail": "Internal server error"}
-        )
+        return JSONResponse(status_code=500, content={"detail": "Internal server error"})
     duration_ms = (time.perf_counter() - start) * 1000
     logger.info(
         "http_request",

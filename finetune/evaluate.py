@@ -228,6 +228,7 @@ def main() -> None:
 
         try:
             from backend.core.schemas import DimensionScore
+
             gen_typed = {
                 d: DimensionScore(
                     score=float(gen_json["dimension_scores"][d]["score"]),
@@ -253,7 +254,9 @@ def main() -> None:
         "samples": n,
         "json_parse_rate": parsed_count / n if n else 0.0,
         "schema_valid_rate": schema_ok_count / n if n else 0.0,
-        "composite_mae": (sum(composite_errors) / len(composite_errors)) if composite_errors else float("nan"),
+        "composite_mae": (sum(composite_errors) / len(composite_errors))
+        if composite_errors
+        else float("nan"),
         "tier_accuracy": tier_correct / n if n else 0.0,
         "rouge_l": sum(rouge_scores) / len(rouge_scores) if rouge_scores else 0.0,
         "bleu_1": sum(bleu_scores) / len(bleu_scores) if bleu_scores else 0.0,
@@ -274,7 +277,11 @@ def main() -> None:
 
     out_path = Path(args.adapter_dir).parent / "eval_metrics.json"
     out_path.write_text(json.dumps(metrics, indent=2))
-    logger.info("eval_complete", metrics_path=str(out_path), **{k: round(v, 4) if isinstance(v, float) else v for k, v in metrics.items()})
+    logger.info(
+        "eval_complete",
+        metrics_path=str(out_path),
+        **{k: round(v, 4) if isinstance(v, float) else v for k, v in metrics.items()},
+    )
 
 
 if __name__ == "__main__":

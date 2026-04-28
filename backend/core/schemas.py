@@ -11,7 +11,7 @@ This module is the single source of truth for:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -130,13 +130,11 @@ class ScoreOutput(BaseModel):
     rag_context_used: str = Field(default="")
     confidence: float = Field(..., ge=0.0, le=1.0)
     model_used: str = Field(default="")
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     @field_validator("dimension_scores")
     @classmethod
-    def _validate_dimension_keys(
-        cls, v: dict[str, DimensionScore]
-    ) -> dict[str, DimensionScore]:
+    def _validate_dimension_keys(cls, v: dict[str, DimensionScore]) -> dict[str, DimensionScore]:
         missing = set(DIMENSION_NAMES) - set(v.keys())
         if missing:
             raise ValueError(f"Missing dimension scores: {sorted(missing)}")
@@ -162,9 +160,7 @@ class BatchResult(BaseModel):
 
 def composite_from_dimensions(dim_scores: dict[str, DimensionScore]) -> float:
     """Compute the 0-100 composite from per-dimension 0-10 scores using fixed weights."""
-    weighted = sum(
-        dim_scores[name].score * weight for name, weight in DIMENSION_WEIGHTS.items()
-    )
+    weighted = sum(dim_scores[name].score * weight for name, weight in DIMENSION_WEIGHTS.items())
     return round(weighted * 10.0, 2)
 
 

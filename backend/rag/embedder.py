@@ -21,9 +21,7 @@ logger = get_logger(__name__)
 
 EMBEDDING_MODEL_NAME: str = "BAAI/bge-large-en-v1.5"
 EMBEDDING_DIM: int = 1024
-BGE_QUERY_INSTRUCTION: str = (
-    "Represent this sentence for searching relevant passages: "
-)
+BGE_QUERY_INSTRUCTION: str = "Represent this sentence for searching relevant passages: "
 
 _model: SentenceTransformer | None = None
 _lock: threading.Lock = threading.Lock()
@@ -55,9 +53,7 @@ def get_embedder() -> SentenceTransformer:
     with _lock:
         if _model is None:
             device = _detect_device()
-            logger.info(
-                "loading_embedding_model", model=EMBEDDING_MODEL_NAME, device=device
-            )
+            logger.info("loading_embedding_model", model=EMBEDDING_MODEL_NAME, device=device)
             _model = SentenceTransformer(EMBEDDING_MODEL_NAME, device=device)
             logger.info("embedding_model_loaded", dim=EMBEDDING_DIM, device=device)
     return _model

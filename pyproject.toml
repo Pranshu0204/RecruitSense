@@ -28,6 +28,9 @@ ignore = [
     "E501",   # line length is enforced by formatter, not linter
     "B008",   # FastAPI uses `Depends()` / `File()` defaults intentionally
     "RUF012", # mutable class attrs are common in Pydantic models
+    "RUF001", # ambiguous unicode in strings — typography (en-dash, ×) is intentional
+    "RUF002", # ambiguous unicode in docstrings — same reason
+    "RUF003", # ambiguous unicode in comments — same reason
 ]
 
 [tool.ruff.lint.per-file-ignores]

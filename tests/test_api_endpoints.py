@@ -12,7 +12,6 @@ import pytest
 
 from backend.core.schemas import ScoreOutput
 
-
 # --- /health -----------------------------------------------------------------
 
 
@@ -81,9 +80,7 @@ def test_screen_happy_path(
     assert body["composite_score"] == 78.5
 
 
-def test_screen_rejects_non_pdf(
-    client, sample_jd_payload: dict, tiny_pdf_bytes: bytes
-) -> None:
+def test_screen_rejects_non_pdf(client, sample_jd_payload: dict, tiny_pdf_bytes: bytes) -> None:
     """Files without a ``.pdf`` extension must be rejected with 400."""
     resp = client.post(
         "/screen",
@@ -104,9 +101,7 @@ def test_screen_rejects_invalid_jd(client, tiny_pdf_bytes: bytes) -> None:
     assert resp.status_code == 422
 
 
-def test_screen_rejects_empty_pdf(
-    client, sample_jd_payload: dict
-) -> None:
+def test_screen_rejects_empty_pdf(client, sample_jd_payload: dict) -> None:
     """Empty upload → 400 with a clear error message."""
     resp = client.post(
         "/screen",
@@ -134,10 +129,7 @@ def test_batch_happy_path(
 
     monkeypatch.setattr(batch_route, "run_pipeline", fake_pipeline)
 
-    files = [
-        ("resumes", (f"cv_{i}.pdf", tiny_pdf_bytes, "application/pdf"))
-        for i in range(3)
-    ]
+    files = [("resumes", (f"cv_{i}.pdf", tiny_pdf_bytes, "application/pdf")) for i in range(3)]
     resp = client.post(
         "/batch",
         data={"jd_json": json.dumps(sample_jd_payload)},
@@ -181,9 +173,7 @@ def test_batch_failed_resume_does_not_kill_batch(
         ("resumes", ("empty.pdf", b"", "application/pdf")),
         ("resumes", ("good2.pdf", tiny_pdf_bytes, "application/pdf")),
     ]
-    resp = client.post(
-        "/batch", data={"jd_json": json.dumps(sample_jd_payload)}, files=files
-    )
+    resp = client.post("/batch", data={"jd_json": json.dumps(sample_jd_payload)}, files=files)
     assert resp.status_code == 200
     body = resp.json()
     assert body["total_resumes"] == 3

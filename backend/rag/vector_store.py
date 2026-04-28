@@ -65,9 +65,7 @@ class QdrantStore:
             self.client.delete_collection(self.collection)
         self.client.create_collection(
             collection_name=self.collection,
-            vectors_config=rest.VectorParams(
-                size=EMBEDDING_DIM, distance=rest.Distance.COSINE
-            ),
+            vectors_config=rest.VectorParams(size=EMBEDDING_DIM, distance=rest.Distance.COSINE),
         )
         logger.info("collection_created", name=self.collection, dim=EMBEDDING_DIM)
 
@@ -86,9 +84,7 @@ class QdrantStore:
         for d in docs:
             point_id = d.get("id") or str(uuid.uuid4())
             payload = {"text": d["text"], **d.get("metadata", {})}
-            points.append(
-                rest.PointStruct(id=point_id, vector=d["vector"], payload=payload)
-            )
+            points.append(rest.PointStruct(id=point_id, vector=d["vector"], payload=payload))
         self.client.upsert(collection_name=self.collection, points=points)
         logger.info("upserted", count=len(points), collection=self.collection)
         return len(points)
@@ -104,9 +100,7 @@ class QdrantStore:
         for point in response.points:
             payload = dict(point.payload or {})
             text = payload.pop("text", "")
-            chunks.append(
-                RetrievedChunk(text=text, score=float(point.score), metadata=payload)
-            )
+            chunks.append(RetrievedChunk(text=text, score=float(point.score), metadata=payload))
         return chunks
 
     def health(self) -> bool:
