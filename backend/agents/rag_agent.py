@@ -1,20 +1,3 @@
-"""RAG agent — RAG Fusion (3 sub-queries + Reciprocal Rank Fusion) over Qdrant.
-
-Algorithm (per Ilin / RAG-Fusion 2023):
-1. Infer ``seniority`` from JD's ``min_experience_years`` and ``industry`` from
-   description/company keywords.
-2. Ask the LLM (cached) to expand the JD into exactly 3 retrieval sub-queries
-   covering: required skills, typical experience profile, common gaps.
-3. Embed each sub-query with BGE-large; retrieve top 2k chunks from Qdrant in
-   parallel.
-4. Merge the three ranked lists with Reciprocal Rank Fusion
-   (``RRF(d) = Σ 1 / (k + rank_q(d))``, k=60) and return the top-``k``.
-5. Format the final chunks into a single context string for the scorer prompt.
-
-Returns ``("", [])`` on any retrieval failure so the scorer can still proceed
-without context (degraded but functional).
-"""
-
 from __future__ import annotations
 
 import asyncio
