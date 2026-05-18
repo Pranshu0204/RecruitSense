@@ -5,11 +5,6 @@ Topology::
            ┌─────► rag ─────┐
     parse ─┤                ├──► score ──► END
            └─────► bias ────┘
-
-The ``rag`` and ``bias`` nodes run in parallel after ``parse`` completes
-(they read disjoint state keys); ``score`` waits for both and consumes their
-outputs. The graph is async end-to-end and reuses the same agents in a
-direct-call mode for batch processing in :func:`run_pipeline`.
 """
 
 from __future__ import annotations
