@@ -1,10 +1,4 @@
-"""RecruitSense agents package — shared LLM factory.
 
-Exposes :func:`get_llm`, a thin wrapper that builds a ``ChatOpenAI`` client
-pointed at OpenRouter (or any OpenAI-compatible endpoint via env). Each agent
-module imports this factory rather than instantiating its own client, so model
-selection is centralized.
-"""
 
 from __future__ import annotations
 
