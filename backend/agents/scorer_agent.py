@@ -1,17 +1,3 @@
-"""Scorer agent — scores a parsed resume against a JD using RAG context.
-
-Pipeline:
-1. Format the scorer prompt with JD + parsed resume + RAG context.
-2. LLM call (cached by sha256 of all inputs + ``PROMPT_VERSION``).
-3. Strip the ``<thinking>...</thinking>`` chain-of-thought block (kept private).
-4. Parse the trailing JSON, validate dimensions, compute composite via
-   :func:`composite_from_dimensions`, derive tier and recommended action.
-5. Attach pre-computed bias flags to the output (these are NOT used in the LLM
-   prompt — bias signals must never influence the score).
-6. On any failure, return a fallback ``ScoreOutput`` with ``confidence=0.0``
-   so a single broken candidate never breaks a batch.
-"""
-
 from __future__ import annotations
 
 import json
