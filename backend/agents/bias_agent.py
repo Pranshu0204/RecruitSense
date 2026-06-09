@@ -9,15 +9,11 @@ Word lists for gender-coded language are adapted from the Gaucher, Friesen &
 Kay (2011) "agentic vs. communal" lexicons commonly used in resume-bias tools.
 """
 
-from __future__ import annotations
-
 import re
 
 from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
-
-
 # --- Gender-coded vocabulary (Gaucher & Friesen-style) -----------------------
 
 MASCULINE_CODED: frozenset[str] = frozenset(
@@ -106,8 +102,6 @@ FEMININE_CODED: frozenset[str] = frozenset(
         "yield",
     }
 )
-
-
 # --- Personal-info regexes / keyword lists -----------------------------------
 
 _LOCATION_REGEX = re.compile(

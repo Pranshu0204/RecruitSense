@@ -1,14 +1,9 @@
 """Parser agent — extracts a structured ``ParsedResume`` from raw resume text.
 
-Pipeline:
-1. LLM call (cached) → JSON via Pydantic-compatible schema.
-2. Job-title normalization on extracted experience entries.
-3. Implicit-skill inference from project descriptions (regex-based augmentation).
-4. Pydantic validation; soft fallback to a near-empty ``ParsedResume`` on any
-   error so a single bad resume never breaks a batch.
+Uses a cached LLM call, then augments the result with regex-based implicit skill
+inference and job-title normalization before Pydantic validation. Falls back to
+a near-empty ParsedResume on any error so a single bad file can't break a batch.
 """
-
-from __future__ import annotations
 
 import json
 import re
@@ -21,8 +16,6 @@ from backend.utils.logger import get_logger
 from backend.utils.redis_cache import cache_llm
 
 logger = get_logger(__name__)
-
-
 # --- Job-title normalization taxonomy -----------------------------------------
 
 JOB_TITLE_TAXONOMY: dict[str, str] = {
@@ -142,8 +135,6 @@ def _normalize_experience_titles(experiences: list[str]) -> list[str]:
 
 
 # --- LLM call -----------------------------------------------------------------
-
-
 @cache_llm(namespace="parser")
 async def _parser_llm_call(resume_text: str) -> dict[str, Any]:
     """Cached LLM call. Returns a parsed JSON dict (raises on failure)."""
@@ -155,8 +146,6 @@ async def _parser_llm_call(resume_text: str) -> dict[str, Any]:
 
 
 # --- Public entry point -------------------------------------------------------
-
-
 async def parse_resume(resume_text: str) -> ParsedResume:
     """Parse raw resume text into a ``ParsedResume``.
 

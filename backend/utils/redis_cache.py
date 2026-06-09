@@ -18,8 +18,6 @@ The decorator transparently handles both sync and async functions::
     def parse(text: str) -> dict: ...
 """
 
-from __future__ import annotations
-
 import asyncio
 import functools
 import hashlib

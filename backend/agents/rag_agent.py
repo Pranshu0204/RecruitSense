@@ -1,4 +1,9 @@
-from __future__ import annotations
+"""RAG Fusion retrieval over the Qdrant knowledge base.
+
+Generates three LLM-expanded sub-queries from the JD, retrieves matching chunks
+in parallel, then merges ranked results with Reciprocal Rank Fusion (k=60) before
+passing context to the scorer. Returns ("", []) gracefully on any retrieval failure.
+"""
 
 import asyncio
 from collections import defaultdict
@@ -15,8 +20,6 @@ logger = get_logger(__name__)
 
 
 # --- JD enrichment heuristics -------------------------------------------------
-
-
 def _infer_seniority(min_experience_years: float) -> str:
     """Map a numeric experience floor to a coarse seniority label."""
     if min_experience_years >= 5:
@@ -49,8 +52,6 @@ def _infer_industry(jd_description: str, company: str) -> str:
 
 
 # --- Sub-query generation -----------------------------------------------------
-
-
 @cache_llm(namespace="rag_subqueries")
 async def _generate_subqueries(job_title: str, seniority: str, industry: str) -> list[str]:
     """Use the LLM to produce 3 retrieval sub-queries (cached)."""
@@ -75,8 +76,6 @@ def _fallback_subqueries(job_title: str, seniority: str, industry: str) -> list[
 
 
 # --- Reciprocal Rank Fusion ---------------------------------------------------
-
-
 def reciprocal_rank_fusion(
     results_per_query: list[list[RetrievedChunk]], k: int = 60
 ) -> list[RetrievedChunk]:
@@ -97,8 +96,6 @@ def reciprocal_rank_fusion(
 
 
 # --- Retrieval helpers --------------------------------------------------------
-
-
 async def _retrieve_one(query: str, store: QdrantStore, k: int) -> list[RetrievedChunk]:
     """Embed + search a single sub-query off the event loop."""
     vector = await asyncio.to_thread(embed_query, query)
@@ -106,8 +103,6 @@ async def _retrieve_one(query: str, store: QdrantStore, k: int) -> list[Retrieve
 
 
 # --- Public entry point -------------------------------------------------------
-
-
 async def retrieve_context(
     jd: JDInput,
     parsed_resume: ParsedResume | None = None,
@@ -165,8 +160,6 @@ __all__ = [
     "_infer_seniority",
     "_infer_industry",
 ]
-
-
 # Re-bind helpers for tests without leading underscore (private-ish public API)
 infer_seniority = _infer_seniority
 infer_industry = _infer_industry

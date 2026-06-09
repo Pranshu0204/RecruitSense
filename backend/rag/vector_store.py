@@ -1,16 +1,8 @@
-"""Qdrant client wrapper for the RecruitSense knowledge collection.
+"""Thin qdrant-client wrapper for the RecruitSense knowledge collection.
 
-Exposes a thin ``QdrantStore`` class around qdrant-client 1.12 with:
-- :meth:`init_collection` — idempotent create (or recreate) with cosine + 1024-dim vectors.
-- :meth:`upsert` — batch insert/update of documents.
-- :meth:`search` — kNN cosine retrieval by query vector.
-- :meth:`health` — liveness check used by ``GET /health``.
-
-A module-level singleton store is exposed via :func:`get_store` and reuses
-``Settings`` for host/port/collection.
+QdrantStore handles collection init, document upsert, kNN search, and health checks.
+A process-wide singleton is exposed via get_store(), configured from Settings.
 """
-
-from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field

@@ -9,8 +9,6 @@ BGE models recommend prefixing *queries* with an instruction string but
 :func:`embed_documents` separately to make that distinction explicit.
 """
 
-from __future__ import annotations
-
 import threading
 
 from sentence_transformers import SentenceTransformer

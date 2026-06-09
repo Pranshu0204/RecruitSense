@@ -5,8 +5,6 @@ Supports filesystem paths or in-memory bytes (e.g., from a FastAPI
 PDFs raise :class:`PDFParseError` since OCR is not configured.
 """
 
-from __future__ import annotations
-
 from pathlib import Path
 
 import fitz

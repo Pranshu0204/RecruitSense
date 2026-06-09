@@ -11,8 +11,6 @@ Usage::
     log.info("resume_scored", candidate="Jane Doe", composite=87.4)
 """
 
-from __future__ import annotations
-
 import logging
 import sys
 
