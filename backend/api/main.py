@@ -10,8 +10,6 @@ Run with::
     uvicorn backend.api.main:app       # production
 """
 
-from __future__ import annotations
-
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -51,8 +49,6 @@ app: FastAPI = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
-
-
 # --- CORS ---------------------------------------------------------------------
 # `*` is fine for local Streamlit dev; tighten the allowlist for production.
 
@@ -66,8 +62,6 @@ app.add_middleware(
 
 
 # --- Structured request/response logging --------------------------------------
-
-
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     """Emit one structured log line per HTTP request with latency in ms."""

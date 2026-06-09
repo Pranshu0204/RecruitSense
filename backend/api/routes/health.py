@@ -1,7 +1,5 @@
 """``GET /health`` — liveness check + Qdrant/Redis dependency health."""
 
-from __future__ import annotations
-
 import asyncio
 
 from fastapi import APIRouter

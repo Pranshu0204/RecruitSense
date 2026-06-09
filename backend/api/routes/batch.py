@@ -7,8 +7,6 @@ pipeline produces a zero-confidence ``ScoreOutput`` for that candidate rather
 than failing the whole batch.
 """
 
-from __future__ import annotations
-
 import asyncio
 import time
 
@@ -63,6 +61,7 @@ def _file_failure_score(filename: str, error: str) -> ScoreOutput:
 async def batch_screen(
     jd_json: str = Form(..., description="JSON-serialized JDInput"),
     resumes: list[UploadFile] = File(..., description=f"Up to {MAX_BATCH_SIZE} resume PDFs"),
+    model: str = Form(default="", description="OpenRouter model slug (overrides server default)"),
 ) -> BatchResult:
     """Screen many resumes against a single JD; returns a ranked leaderboard."""
     try:
@@ -90,7 +89,7 @@ async def batch_screen(
                 if not filename.lower().endswith(".pdf"):
                     return _file_failure_score(filename, "not a PDF")
                 text = extract_text_from_pdf(pdf_bytes)
-                return await run_pipeline(jd, text)
+                return await run_pipeline(jd, text, model=model)
             except PDFParseError as exc:
                 return _file_failure_score(filename, str(exc))
             except Exception as exc:

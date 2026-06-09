@@ -8,8 +8,6 @@ Runs the LangGraph DAG (parser → rag ∥ bias → scorer) and returns a
 :class:`ScoreOutput`.
 """
 
-from __future__ import annotations
-
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import ValidationError
 
@@ -26,6 +24,7 @@ router: APIRouter = APIRouter()
 async def screen_resume(
     jd_json: str = Form(..., description="JSON-serialized JDInput"),
     resume: UploadFile = File(..., description="Candidate resume (PDF)"),
+    model: str = Form(default="", description="OpenRouter model slug (overrides server default)"),
 ) -> ScoreOutput:
     """Screen a single resume PDF against a JD."""
     try:
@@ -54,4 +53,4 @@ async def screen_resume(
         jd_title=jd.job_title,
         resume_chars=len(resume_text),
     )
-    return await run_pipeline(jd, resume_text)
+    return await run_pipeline(jd, resume_text, model=model)
