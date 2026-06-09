@@ -7,8 +7,6 @@ deterministic — and lets a contributor run ``pytest`` on a fresh clone with
 no infra running locally.
 """
 
-from __future__ import annotations
-
 import os
 from collections.abc import Iterator
 

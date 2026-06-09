@@ -1,7 +1,5 @@
 """RAG-Fusion ranking + JD-enrichment heuristics."""
 
-from __future__ import annotations
-
 import pytest
 
 from backend.agents.rag_agent import (

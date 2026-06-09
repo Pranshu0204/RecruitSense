@@ -1,7 +1,5 @@
 """PDF parser tests — happy path + error cases."""
 
-from __future__ import annotations
-
 import pytest
 
 from backend.utils.pdf_parser import PDFParseError, extract_text_from_pdf

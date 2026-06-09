@@ -1,7 +1,5 @@
 """Bias-signal detector tests."""
 
-from __future__ import annotations
-
 from backend.agents.bias_agent import detect_bias_signals
 
 

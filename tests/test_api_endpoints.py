@@ -4,17 +4,14 @@ External dependencies (the LLM pipeline and the vector / cache stores) are
 monkeypatched at import-resolution boundaries so the suite stays hermetic.
 """
 
-from __future__ import annotations
-
 import json
 
 import pytest
 
 from backend.core.schemas import ScoreOutput
 
+
 # --- /health -----------------------------------------------------------------
-
-
 def test_health_ok_when_both_deps_up(monkeypatch: pytest.MonkeyPatch, client) -> None:
     """Both deps healthy → ``status: ok`` and 200."""
     from backend.api.routes import health as health_route
@@ -51,8 +48,6 @@ def test_health_degraded_when_redis_down(monkeypatch: pytest.MonkeyPatch, client
 
 
 # --- /screen -----------------------------------------------------------------
-
-
 def test_screen_happy_path(
     monkeypatch: pytest.MonkeyPatch,
     client,
@@ -63,7 +58,7 @@ def test_screen_happy_path(
     """End-to-end multipart POST with mocked pipeline returns the ScoreOutput JSON."""
     from backend.api.routes import screen as screen_route
 
-    async def fake_pipeline(_jd, _resume_text):
+    async def fake_pipeline(_jd, _resume_text, model=""):
         return ScoreOutput.model_validate(sample_score_output_dict)
 
     monkeypatch.setattr(screen_route, "run_pipeline", fake_pipeline)
@@ -112,8 +107,6 @@ def test_screen_rejects_empty_pdf(client, sample_jd_payload: dict) -> None:
 
 
 # --- /batch ------------------------------------------------------------------
-
-
 def test_batch_happy_path(
     monkeypatch: pytest.MonkeyPatch,
     client,
@@ -124,7 +117,7 @@ def test_batch_happy_path(
     """Multi-PDF batch returns a sorted leaderboard + tier distribution."""
     from backend.api.routes import batch as batch_route
 
-    async def fake_pipeline(_jd, _resume_text):
+    async def fake_pipeline(_jd, _resume_text, model=""):
         return ScoreOutput.model_validate(sample_score_output_dict)
 
     monkeypatch.setattr(batch_route, "run_pipeline", fake_pipeline)
@@ -163,7 +156,7 @@ def test_batch_failed_resume_does_not_kill_batch(
     """An empty/invalid PDF in a batch should degrade to a zero-confidence row."""
     from backend.api.routes import batch as batch_route
 
-    async def fake_pipeline(_jd, _resume_text):
+    async def fake_pipeline(_jd, _resume_text, model=""):
         return ScoreOutput.model_validate(sample_score_output_dict)
 
     monkeypatch.setattr(batch_route, "run_pipeline", fake_pipeline)

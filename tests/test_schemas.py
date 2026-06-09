@@ -1,7 +1,5 @@
 """Schema, helper, and tier-mapping tests for ``backend.core.schemas``."""
 
-from __future__ import annotations
-
 import pytest
 from pydantic import ValidationError
 

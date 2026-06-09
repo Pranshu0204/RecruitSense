@@ -1,7 +1,5 @@
 """Redis-cache decorator tests — focused on graceful degradation when Redis is down."""
 
-from __future__ import annotations
-
 import asyncio
 
 import pytest
