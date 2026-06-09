@@ -2,7 +2,7 @@
 
 **LLM-powered resume screener with RAG, multi-agent orchestration, bias detection, and a local-first QLoRA fine-tuning pipeline.**
 
-[![CI](https://github.com/USER/recruitsense/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/recruitsense/actions/workflows/ci.yml)
+[![CI](https://github.com/Pranshu0204/RecruitSense/actions/workflows/ci.yml/badge.svg)](https://github.com/Pranshu0204/RecruitSense/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%20|%203.12-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -10,8 +10,25 @@ RecruitSense scores a candidate's resume against a job description on five weigh
 
 ---
 
+## Demo
+
+**1. Submit a job description and a resume.** The recruiter fills in the JD, sets required/preferred skills and minimum experience, and uploads a PDF resume.
+
+![Screening input form](assets/input-form.png)
+
+**2. Get a scored, tiered result.** A weighted composite (0–100), a tier (A/B/C/D), a recommended action, model confidence, and a per-dimension breakdown — all computed deterministically in code from the LLM's dimension scores.
+
+![Composite score and per-dimension breakdown](assets/score-result.png)
+
+**3. Review strengths, gaps, and bias signals.** Top strengths and key gaps are pulled from the model; bias signals (gender-coded language, age/marital disclosures) are detected separately and **excluded from the scoring prompt** — surfaced only so a recruiter can ensure fair downstream handling.
+
+![Strengths, gaps, and bias signals](assets/strengths-gaps-bias.png)
+
+---
+
 ## Table of contents
 
+- [Demo](#demo)
 - [Highlights](#highlights)
 - [Architecture](#architecture)
 - [Quick start (Docker)](#quick-start-docker)
@@ -79,7 +96,7 @@ Bias flags are surfaced alongside the score but **never** enter the scorer promp
 ## Quick start (Docker)
 
 ```bash
-git clone https://github.com/USER/recruitsense.git
+git clone https://github.com/Pranshu0204/RecruitSense.git
 cd recruitsense
 
 cp .env.example .env
@@ -187,20 +204,25 @@ All config is loaded via `pydantic-settings` from environment variables or `.env
 |-------------------------|--------------------------------------|-------|
 | `OPENROUTER_API_KEY`    | _(required)_                         | OpenRouter routes to any supported LLM. |
 | `OPENROUTER_BASE_URL`   | `https://openrouter.ai/api/v1`       | |
-| `DEFAULT_MODEL`         | `mistralai/mistral-7b-instruct`      | Override per-call from the UI. |
+| `DEFAULT_MODEL`         | `openai/gpt-oss-120b:free`           | Override per-call from the UI. Must be a free-tier OpenRouter model. |
 | `QDRANT_HOST` / `_PORT` | `localhost` / `6333`                 | |
 | `QDRANT_COLLECTION`     | `recruitsense_knowledge`             | |
-| `REDIS_HOST` / `_PORT`  | `localhost` / `6379`                 | Optional — degrades gracefully. |
-| `REDIS_TTL_SECONDS`     | `3600`                               | LLM cache TTL. |
-| `FINETUNE_BASE_MODEL`   | `mistralai/Mistral-7B-Instruct-v0.3` | See [Fine-tuning](#fine-tuning-local-first). |
-| `MLFLOW_TRACKING_URI`   | `http://localhost:5000`              | Optional. |
+| `REDIS_HOST` / `_PORT`  | `localhost` / `6379`                 | Optional — degrades gracefully to no-cache. |
+| `REDIS_TTL_SECONDS`     | `3600`                               | LLM response cache TTL in seconds. |
 | `LOG_LEVEL`             | `INFO`                               | |
 
 ---
 
 ## Fine-tuning (local-first)
 
-The fine-tuning pipeline is designed to run on three host flavors **without code changes**:
+Two additional env vars apply only to this pipeline (not needed for the screener itself):
+
+| Variable | Default | Notes |
+|---|---|---|
+| `FINETUNE_BASE_MODEL` | `mistralai/Mistral-7B-Instruct-v0.3` | Base model pulled from HF Hub. |
+| `MLFLOW_TRACKING_URI` | `http://localhost:5000` | Optional — metrics log silently if unreachable. |
+
+The pipeline is designed to run on three host flavors **without code changes**:
 
 | Device | Strategy |
 |--------|----------|
@@ -292,7 +314,8 @@ recruitsense/
 │   ├── evaluate.py                # JSON-parse, MAE, tier acc, ROUGE-L, BLEU-1
 │   └── mlflow_utils.py            # No-op fallback when tracking server is down
 ├── data/
-│   └── skill_taxonomy.json        # 32 roles → ingested as ~190 RAG chunks
+│   ├── skill_taxonomy.json        # 32 roles → ingested as ~190 RAG chunks
+│   └── sample_pairs.json          # JD/resume pairs used for RAG seeding
 ├── tests/                         # pytest, hermetic (no network or Docker needed)
 ├── .github/workflows/ci.yml       # ruff + pytest + Docker build smoke
 ├── docker-compose.yml             # qdrant + redis + backend + frontend
