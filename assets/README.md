@@ -1,12 +1,7 @@
-# Screenshots
-
-The README's **Demo** section references three images that live here:
+# Demo Screenshots
 
 | File | What it shows |
 |------|---------------|
-| `input-form.png` | The Single Screen tab — JD fields, skills, and the resume PDF upload. |
-| `score-result.png` | The result view — composite gauge, tier, confidence, and per-dimension bars. |
-| `strengths-gaps-bias.png` | Top strengths, key gaps, and the detected bias signals. |
-
-Save the captured screenshots here using these exact filenames and they will
-render in the README on GitHub.
+| `input-form.png` | Single Screen tab — job description fields, required/preferred skills, and resume PDF upload. |
+| `score-result.png` | Result view — composite gauge (0–100), tier badge, model confidence, and per-dimension score bars. |
+| `strengths-gaps-bias.png` | Top strengths, key gaps, and bias signals detected in the resume (excluded from the scoring prompt). |
