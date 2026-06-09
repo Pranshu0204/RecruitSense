@@ -47,11 +47,8 @@ def resolve_model(model: str | None) -> str:
 def get_llm(model: str | None = None, temperature: float = 0.1) -> ChatOpenAI:
     """Return a ``ChatOpenAI`` instance configured for OpenRouter.
 
-    Args:
-        model: model id; defaults to (and is validated against) the configured
-            free-tier allowlist via :func:`resolve_model`.
-        temperature: sampling temperature; low (0.1) for deterministic scoring,
-            slightly higher for sub-query generation.
+    ``model`` is validated against the free-tier allowlist via
+    :func:`resolve_model` before being forwarded to the client.
     """
     settings = get_settings()
     return ChatOpenAI(

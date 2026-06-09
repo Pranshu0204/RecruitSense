@@ -142,16 +142,8 @@ _NATIONALITY_KEYWORDS: tuple[str, ...] = (
 def detect_bias_signals(text: str) -> list[str]:
     """Scan resume text for bias signals and PII over-disclosure.
 
-    Args:
-        text: raw resume text.
-
-    Returns:
-        Human-readable advisory flags. Empty list if nothing flagged.
-
-    Note:
-        These flags MUST NOT be passed to the scorer prompt — the scorer's
-        contract is to ignore them entirely. They are attached to ``ScoreOutput``
-        for the recruiter UI only.
+    Returns human-readable advisory flags. These are attached to ScoreOutput
+    for the recruiter UI and must never be forwarded to the scorer prompt.
     """
     if not text:
         return []
