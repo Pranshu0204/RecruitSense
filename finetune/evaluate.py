@@ -1,28 +1,8 @@
-"""Evaluate a fine-tuned LoRA adapter against the held-out validation split.
+"""Evaluate a fine-tuned LoRA adapter against the held-out validation set.
 
-Computes four families of metrics so you can read both **format quality**
-and **scoring fidelity** at a glance:
-
-- **JSON-parse rate** — % of generations that survive ``json.loads`` and a
-  Pydantic ``ScoreOutput`` round-trip. The single most important number for
-  a structured-output fine-tune; if this is low, nothing else matters.
-- **Per-dimension MAE** — mean absolute error of each 0–10 dimension score
-  vs. the reference target.
-- **Composite MAE & tier accuracy** — error on the aggregate 0–100 score and
-  how often the predicted tier (A/B/C/D) matches the reference.
-- **ROUGE-L & BLEU** — surface-level text overlap between generated and
-  reference rationales (a sanity check on style).
-
-Usage::
-
-    python -m finetune.evaluate \\
-        --base-model meta-llama/Llama-3.2-1B-Instruct \\
-        --adapter-dir finetune/runs/<timestamp>/adapter \\
-        --val-file finetune/dataset/data/val.jsonl \\
-        --max-samples 100
+Reports JSON parse rate, per-dimension MAE, composite score error, tier accuracy,
+and ROUGE-L / BLEU-1 against the reference targets from prepare_dataset.py.
 """
-
-from __future__ import annotations
 
 import argparse
 import json

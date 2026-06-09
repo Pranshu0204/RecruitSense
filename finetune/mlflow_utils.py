@@ -10,8 +10,6 @@ The tracking URI is taken from :class:`backend.core.config.Settings`
 (``MLFLOW_TRACKING_URI``, default ``http://localhost:5000``).
 """
 
-from __future__ import annotations
-
 import contextlib
 import os
 from collections.abc import Iterator

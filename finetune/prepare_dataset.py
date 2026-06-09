@@ -1,29 +1,9 @@
 """Convert ``AzharAli05/Resume-Screening-Dataset`` into instruction-tuning JSONL.
 
-The HF dataset has a ``Resume`` text column and a ``Category`` label (the broad
-job family — "Data Science", "DevOps Engineer", etc.). It does NOT ship
-ground-truth scoring outputs, so this script:
-
-1. Loads the dataset from the HuggingFace Hub (cached locally).
-2. For each row, synthesizes a plausible JD for the given category from a
-   handful of templates.
-3. Generates a deterministic *target* JSON in the exact ``ScoreOutput`` shape
-   the production scorer emits, with per-dimension scores derived from a
-   simple keyword-overlap heuristic.
-4. Writes train / val splits as chat-formatted JSONL ready for
-   :func:`trl.SFTTrainer` (one ``messages`` list per line).
-
-The resulting dataset teaches the base model the *shape* and *style* of the
-scoring output — it is an instruction-format conditioner, not a ground-truth
-distillation. Use a stronger teacher LLM if you want to align scores to a
-reference judge.
-
-Usage::
-
-    python -m finetune.prepare_dataset --max-samples 2000 --val-frac 0.1
+The dataset has resume text and a coarse category label but no ground-truth scores,
+so targets are synthesized via keyword-overlap heuristics. This conditions the model
+on the ScoreOutput schema and rationale style rather than absolute hiring judgment.
 """
-
-from __future__ import annotations
 
 import argparse
 import json

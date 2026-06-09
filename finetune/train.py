@@ -1,33 +1,9 @@
-"""QLoRA fine-tuning script — TRL ``SFTTrainer`` with auto device detection.
+"""QLoRA fine-tuning with TRL SFTTrainer and automatic device detection.
 
-Designed to run on three flavors of host without code changes:
-
-================  ============================================================
-Device            Strategy
-================  ============================================================
-CUDA + bnb        4-bit NF4 base + LoRA adapters (true QLoRA, lowest VRAM).
-CUDA (no bnb)     bf16 base + LoRA adapters.
-MPS (Apple)       fp16 base + LoRA adapters; ``bitsandbytes`` is NOT imported.
-CPU               fp32 base + LoRA adapters; tiny defaults; for smoke tests.
-================  ============================================================
-
-The ``bitsandbytes`` import is *lazy and optional* so this script runs cleanly
-on macOS, where bnb has no working build. On Apple Silicon you'll typically
-want a 1–3B base model (Llama-3.2-1B / 3B, Qwen2.5-1.5B) — Mistral-7B will
-swap heavily on a 16 GB machine.
-
-Usage::
-
-    # Quick local smoke test on a Mac (1B model, 200 steps):
-    python -m finetune.train \\
-        --base-model meta-llama/Llama-3.2-1B-Instruct \\
-        --max-steps 200 --per-device-batch-size 1
-
-    # Full run on a CUDA box:
-    python -m finetune.train --num-epochs 3
+Works on CUDA (4-bit NF4 + LoRA adapters), MPS (fp16 + LoRA), and CPU (fp32 + LoRA)
+without code changes. The bitsandbytes import is lazy so the script runs cleanly on
+macOS where bnb has no working build.
 """
-
-from __future__ import annotations
 
 import argparse
 import importlib.util
@@ -225,7 +201,7 @@ def main() -> None:
         optim="paged_adamw_8bit" if bnb else "adamw_torch",
         report_to=[],  # we log to MLflow directly to avoid trainer-side coupling.
         seed=args.seed,
-        max_length=args.max_seq_length,
+        max_seq_length=args.max_seq_length,
         packing=False,
         gradient_checkpointing=(device == "cuda"),
     )
