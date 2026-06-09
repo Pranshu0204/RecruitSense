@@ -1,17 +1,10 @@
-"""One-shot ingestion of skill taxonomy + sample JD/resume pairs into Qdrant.
+"""Ingest the skill taxonomy and sample JD/resume pairs into Qdrant.
 
-Run via::
-
-    make ingest                       # idempotent — skips collection if it exists
-    python -m backend.rag.ingest --recreate    # drop and rebuild
-
-The taxonomy is read from ``data/skill_taxonomy.json`` and flattened into
-multiple per-role chunks (overview, tech-stack, seniority benchmark, common
-gap). Twenty short sample JD/resume match descriptions are appended inline so
-the RAG agent always has grounded examples to retrieve.
+The taxonomy (``data/skill_taxonomy.json``) is flattened into per-role chunks and
+the curated match descriptions (``data/sample_pairs.json``) are appended, giving
+the RAG agent grounded examples to retrieve. Idempotent; pass ``--recreate`` to
+drop and rebuild the collection.
 """
-
-from __future__ import annotations
 
 import argparse
 import json
@@ -26,174 +19,16 @@ logger = get_logger(__name__)
 
 DATA_DIR: Path = Path(__file__).resolve().parents[2] / "data"
 TAXONOMY_PATH: Path = DATA_DIR / "skill_taxonomy.json"
+SAMPLE_PAIRS_PATH: Path = DATA_DIR / "sample_pairs.json"
 
 
-# --- Twenty synthesized JD ↔ ideal-resume match descriptions ----------------
-# Each is a short paragraph the RAG agent can retrieve for "what does a strong
-# candidate look like for X role" prompts. Short, varied across roles/seniority.
-
-SAMPLE_JD_RESUME_PAIRS: list[dict[str, Any]] = [
-    {
-        "text": (
-            "JD: Senior Backend Engineer at a fintech requiring Python, FastAPI, "
-            "PostgreSQL, AWS. Strong match: 6+ yrs Python, owned a payment service "
-            "on EKS, deep transactional integrity, runbooks for on-call."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Backend Engineer"},
-    },
-    {
-        "text": (
-            "JD: Mid-level React Frontend Engineer for a SaaS dashboard. Strong "
-            "match: 3-4 yrs React + TypeScript, shipped accessible component "
-            "library, Cypress E2E, Lighthouse > 90."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Frontend Engineer"},
-    },
-    {
-        "text": (
-            "JD: Senior ML Engineer in healthcare AI. Strong match: PyTorch + "
-            "MONAI experience, productionized clinical NLP model, owns model "
-            "registry, SOC2 + HIPAA awareness, MICCAI paper a plus."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "ML Engineer"},
-    },
-    {
-        "text": (
-            "JD: Data Engineer at an analytics company. Strong match: 4+ yrs "
-            "Spark/Airflow, dbt models for Snowflake, partition tuning at TB "
-            "scale, owned a streaming pipeline (Kafka → Iceberg)."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Data Engineer"},
-    },
-    {
-        "text": (
-            "JD: DevOps Engineer for a Kubernetes platform team. Strong match: "
-            "Terraform + Helm + ArgoCD, wrote a custom Kubernetes operator, "
-            "GitOps experience, AWS solutions architect cert."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "DevOps Engineer"},
-    },
-    {
-        "text": (
-            "JD: Junior Data Scientist at a retail e-commerce startup. Strong "
-            "match: 0-2 yrs, Kaggle medals, built recsys prototypes, comfortable "
-            "with pandas + scikit-learn, conveys results clearly."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Data Scientist"},
-    },
-    {
-        "text": (
-            "JD: iOS Engineer for a fitness app. Strong match: 3+ yrs Swift + "
-            "SwiftUI, HealthKit integration, App Store releases owned, Combine "
-            "and async/await fluency."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Mobile iOS Developer"},
-    },
-    {
-        "text": (
-            "JD: Site Reliability Engineer at a high-traffic ad-tech firm. Strong "
-            "match: 5+ yrs, SLO engineering, owned Prometheus + Grafana stack, "
-            "wrote postmortems, Go for control-plane tooling."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Site Reliability Engineer"},
-    },
-    {
-        "text": (
-            "JD: LLM Engineer for an AI productivity startup. Strong match: "
-            "RAG systems in production (LangChain or LlamaIndex), familiarity "
-            "with Qdrant/Weaviate, evals harness, prompt versioning."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "LLM Engineer"},
-    },
-    {
-        "text": (
-            "JD: Security Engineer at a payments platform. Strong match: 4+ yrs "
-            "appsec, SAST/DAST tooling, threat modeling, OWASP Top 10 fluency, "
-            "OSCP a plus, hands-on incident response."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Security Engineer"},
-    },
-    {
-        "text": (
-            "JD: Senior Full-Stack Engineer at an early-stage SaaS startup. "
-            "Strong match: ships features end-to-end (React + Node + Postgres), "
-            "comfortable owning CI, infra-as-code, has 0→1 startup history."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Full-Stack Engineer"},
-    },
-    {
-        "text": (
-            "JD: NLP Engineer for a legal-tech firm. Strong match: 3+ yrs, "
-            "transformer fine-tuning, span extraction / NER, comfortable with "
-            "Hugging Face Trainer, evaluation against domain-specific test sets."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "NLP Engineer"},
-    },
-    {
-        "text": (
-            "JD: Computer Vision Engineer for an autonomous-vehicle perception "
-            "team. Strong match: PyTorch + ROS2, multi-sensor fusion (LiDAR + "
-            "camera), CUDA optimization, KITTI/nuScenes experience."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Computer Vision Engineer"},
-    },
-    {
-        "text": (
-            "JD: MLOps Engineer at a series-B AI company. Strong match: "
-            "Kubeflow or Metaflow in production, MLflow + model registry, "
-            "feature stores, drift monitoring with Evidently or Great Expectations."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "MLOps Engineer"},
-    },
-    {
-        "text": (
-            "JD: Cloud Architect for a regulated industry migration. Strong "
-            "match: AWS or Azure pro-level certs, designed multi-account "
-            "landing zones, network segmentation, FinOps cost optimization."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Cloud Architect"},
-    },
-    {
-        "text": (
-            "JD: Test Automation Engineer for a fintech. Strong match: 4+ yrs "
-            "Selenium/Playwright + pytest/Jest, contract testing with Pact, "
-            "owned a test pyramid, integrated tests into CI."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Test Automation Engineer"},
-    },
-    {
-        "text": (
-            "JD: Engineering Manager (5 IC team). Strong match: 7+ yrs IC + 2+ "
-            "yrs management, ran weekly 1:1s, drove perf calibration, technical "
-            "depth to unblock teams without micromanaging."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Engineering Manager"},
-    },
-    {
-        "text": (
-            "JD: Embedded Systems Engineer for IoT consumer hardware. Strong "
-            "match: C/C++ on ARM Cortex-M, RTOS familiarity, BLE stack, "
-            "low-power design, JTAG debugging."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Embedded Systems Engineer"},
-    },
-    {
-        "text": (
-            "JD: Senior Database Administrator. Strong match: 7+ yrs Postgres + "
-            "MySQL, replication topologies, query plan tuning, backup/restore "
-            "runbooks, on-call experience for tier-1 systems."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Database Administrator"},
-    },
-    {
-        "text": (
-            "JD: Developer Relations Engineer for a developer-tools startup. "
-            "Strong match: prior IC eng background, conference talks, "
-            "open-source contributions, technical writing portfolio."
-        ),
-        "metadata": {"type": "jd_resume_pair", "role": "Developer Relations Engineer"},
-    },
-]
+def _load_sample_pairs() -> list[dict[str, Any]]:
+    """Load the curated JD/ideal-resume match descriptions that ground retrieval."""
+    if not SAMPLE_PAIRS_PATH.exists():
+        logger.warning("sample_pairs_missing", path=str(SAMPLE_PAIRS_PATH))
+        return []
+    with SAMPLE_PAIRS_PATH.open(encoding="utf-8") as f:
+        return json.load(f)
 
 
 def _flatten_taxonomy(taxonomy: dict[str, Any]) -> list[dict[str, Any]]:
@@ -270,12 +105,13 @@ def main(recreate: bool = False) -> None:
         return
 
     docs: list[dict[str, Any]] = _flatten_taxonomy(taxonomy)
-    docs.extend(SAMPLE_JD_RESUME_PAIRS)
+    sample_pairs = _load_sample_pairs()
+    docs.extend(sample_pairs)
     logger.info(
         "documents_prepared",
         total=len(docs),
-        from_taxonomy=len(docs) - len(SAMPLE_JD_RESUME_PAIRS),
-        sample_pairs=len(SAMPLE_JD_RESUME_PAIRS),
+        from_taxonomy=len(docs) - len(sample_pairs),
+        sample_pairs=len(sample_pairs),
     )
 
     texts: list[str] = [d["text"] for d in docs]
