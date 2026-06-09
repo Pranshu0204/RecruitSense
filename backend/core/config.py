@@ -6,8 +6,6 @@ overridden via environment variables (case-insensitive) or a ``.env`` file at
 the project root.
 """
 
-from __future__ import annotations
-
 from functools import lru_cache
 
 from pydantic import Field, field_validator
@@ -27,7 +25,7 @@ class Settings(BaseSettings):
     # --- OpenRouter LLM ---
     openrouter_api_key: str = Field(default="", description="OpenRouter API key.")
     openrouter_base_url: str = Field(default="https://openrouter.ai/api/v1")
-    default_model: str = Field(default="mistralai/mistral-7b-instruct")
+    default_model: str = Field(default="openai/gpt-oss-120b:free")
 
     # --- Qdrant ---
     qdrant_host: str = Field(default="localhost")

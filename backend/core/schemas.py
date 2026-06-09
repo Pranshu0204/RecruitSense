@@ -1,20 +1,14 @@
-"""Pydantic v2 schemas — input/output contracts for RecruitSense.
+"""Pydantic v2 schemas and scoring helpers for RecruitSense.
 
-This module is the single source of truth for:
-- Input shapes (``JDInput``, ``ResumeInput``).
-- Internal parsed-resume representation (``ParsedResume``).
-- Per-dimension and aggregate scoring outputs (``DimensionScore``, ``ScoreOutput``).
-- Batch results (``BatchResult``).
-- The five scoring dimensions and their fixed weights.
-- Helpers to compute composite scores, tiers, and recommended actions.
+Defines all I/O contracts (JDInput, ParsedResume, ScoreOutput, BatchResult),
+the five scoring dimensions with their fixed weights, and the composite/tier/action
+helper functions used across the pipeline.
 """
-
-from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # --- Scoring dimensions (single source of truth) ------------------------------
 
@@ -31,8 +25,6 @@ assert abs(sum(DIMENSION_WEIGHTS.values()) - 1.0) < 1e-6, "Scoring weights must 
 
 
 # --- Enums --------------------------------------------------------------------
-
-
 class Tier(str, Enum):
     """Candidate tier derived from composite score."""
 
@@ -63,8 +55,6 @@ class RecommendedAction(str, Enum):
 
 
 # --- Input schemas ------------------------------------------------------------
-
-
 class JDInput(BaseModel):
     """Job description input from the recruiter."""
 
@@ -85,15 +75,13 @@ class ResumeInput(BaseModel):
     file_path: str | None = None
 
     @model_validator(mode="after")
-    def _require_text_or_path(self) -> ResumeInput:
+    def _require_text_or_path(self) -> "ResumeInput":
         if not self.raw_text and not self.file_path:
             raise ValueError("ResumeInput requires either `raw_text` or `file_path`")
         return self
 
 
 # --- Internal parsed-resume model --------------------------------------------
-
-
 class ParsedResume(BaseModel):
     """Structured fields extracted from raw resume text by the parser agent."""
 
@@ -107,8 +95,6 @@ class ParsedResume(BaseModel):
 
 
 # --- Output schemas -----------------------------------------------------------
-
-
 class DimensionScore(BaseModel):
     """Score and rationale for a single scoring dimension."""
 
@@ -118,6 +104,9 @@ class DimensionScore(BaseModel):
 
 class ScoreOutput(BaseModel):
     """Full scoring result for a single candidate."""
+
+    # `model_used` would otherwise collide with Pydantic's protected `model_` namespace.
+    model_config = ConfigDict(protected_namespaces=())
 
     candidate_name: str
     composite_score: float = Field(..., ge=0.0, le=100.0)
@@ -156,8 +145,6 @@ class BatchResult(BaseModel):
 
 
 # --- Helpers ------------------------------------------------------------------
-
-
 def composite_from_dimensions(dim_scores: dict[str, DimensionScore]) -> float:
     """Compute the 0-100 composite from per-dimension 0-10 scores using fixed weights."""
     weighted = sum(dim_scores[name].score * weight for name, weight in DIMENSION_WEIGHTS.items())

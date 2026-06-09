@@ -1,19 +1,12 @@
-"""Versioned LLM prompt templates for RecruitSense agents.
+"""LLM prompt templates for the parser, RAG, and scorer agents.
 
-Templates are LangChain ``ChatPromptTemplate`` instances so they can be invoked
-directly by ``LLMChain`` / ``RunnableSequence`` callers in Phase 5.
-
-Bumping ``PROMPT_VERSION`` invalidates the Redis cache (the cache key includes
-the version), so prompt changes never silently serve stale completions.
+Bump PROMPT_VERSION whenever a prompt changes — the Redis cache key includes
+this value, so old cached responses are automatically invalidated.
 """
-
-from __future__ import annotations
 
 from langchain_core.prompts import ChatPromptTemplate
 
 PROMPT_VERSION: str = "v1"
-
-
 # --- Parser agent -------------------------------------------------------------
 
 _PARSER_SYSTEM = """You are an expert resume parser. Extract structured data from raw resume text and return ONLY valid JSON matching the requested schema.
@@ -41,8 +34,6 @@ Return JSON with these exact keys:
 PARSER_PROMPT: ChatPromptTemplate = ChatPromptTemplate.from_messages(
     [("system", _PARSER_SYSTEM), ("user", _PARSER_USER)]
 )
-
-
 # --- RAG sub-query generator --------------------------------------------------
 
 _RAG_SUBQUERY_SYSTEM = """You expand a job-matching task into exactly 3 retrieval queries for a skills/role knowledge base. Output the 3 queries on separate lines, one per line, no numbering, no commentary."""
@@ -59,8 +50,6 @@ Generate three retrieval queries covering:
 RAG_SUBQUERY_PROMPT: ChatPromptTemplate = ChatPromptTemplate.from_messages(
     [("system", _RAG_SUBQUERY_SYSTEM), ("user", _RAG_SUBQUERY_USER)]
 )
-
-
 # --- Scorer agent -------------------------------------------------------------
 
 _SCORER_SYSTEM = """You are an expert resume scorer for a recruiter. Score the candidate against the JD across five dimensions:
@@ -114,8 +103,6 @@ Return JSON with this exact shape:
 SCORER_PROMPT: ChatPromptTemplate = ChatPromptTemplate.from_messages(
     [("system", _SCORER_SYSTEM), ("user", _SCORER_USER)]
 )
-
-
 __all__ = [
     "PROMPT_VERSION",
     "PARSER_PROMPT",
