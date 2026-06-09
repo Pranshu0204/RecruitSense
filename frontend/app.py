@@ -11,10 +11,9 @@ The UI is purely a thin client over the FastAPI backend. Configure the API
 base URL in the sidebar; defaults to ``http://localhost:8000``.
 """
 
-from __future__ import annotations
-
 import io
 import json
+import os
 from typing import Any
 
 import httpx
@@ -25,15 +24,17 @@ import streamlit as st
 
 # --- Constants ----------------------------------------------------------------
 
-DEFAULT_API_URL = "http://localhost:8000"
-DEFAULT_MODEL = "anthropic/claude-3.5-sonnet"
+DEFAULT_API_URL = os.environ.get("RECRUITSENSE_API_URL", "http://localhost:8000")
+# Free-tier OpenRouter models only — no account credits required.
+# Ordered fastest/most-reliable first. meta-llama-3.3-70b:free is intentionally
+# omitted: it is frequently rate-limited (429) and produces zero fallback scores.
+DEFAULT_MODEL = "openai/gpt-oss-120b:free"
 MODEL_CHOICES = [
-    "anthropic/claude-3.5-sonnet",
-    "anthropic/claude-3.5-haiku",
-    "openai/gpt-4o",
-    "openai/gpt-4o-mini",
-    "meta-llama/llama-3.1-70b-instruct",
-    "mistralai/mistral-large",
+    "openai/gpt-oss-120b:free",
+    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "z-ai/glm-4.5-air:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
 ]
 MAX_BATCH_UI = 20  # UI limit; backend allows up to 50.
 REQUEST_TIMEOUT_SECONDS = 600.0  # batch of 20 with cold cache can be slow.
@@ -84,7 +85,7 @@ def render_sidebar() -> tuple[str, str]:
             if st.session_state.get("model", DEFAULT_MODEL) in MODEL_CHOICES
             else DEFAULT_MODEL
         ),
-        help="OpenRouter-routed model. The backend currently uses its own DEFAULT_MODEL setting.",
+        help="Free-tier OpenRouter model used for scoring. Sent to the backend with each request.",
     )
     st.session_state["model"] = model
 
@@ -344,20 +345,22 @@ def _dimension_bars(dim_scores: dict[str, dict[str, Any]]) -> go.Figure:
 
 
 def call_screen(
-    api_url: str, jd: dict[str, Any], pdf_bytes: bytes, filename: str
+    api_url: str, jd: dict[str, Any], pdf_bytes: bytes, filename: str, model: str = ""
 ) -> dict[str, Any]:
     """POST one resume to the backend ``/screen`` endpoint."""
     files = {"resume": (filename, pdf_bytes, "application/pdf")}
-    data = {"jd_json": json.dumps(jd)}
+    data = {"jd_json": json.dumps(jd), "model": model}
     resp = httpx.post(f"{api_url}/screen", data=data, files=files, timeout=REQUEST_TIMEOUT_SECONDS)
     resp.raise_for_status()
     return resp.json()
 
 
-def call_batch(api_url: str, jd: dict[str, Any], pdfs: list[tuple[str, bytes]]) -> dict[str, Any]:
+def call_batch(
+    api_url: str, jd: dict[str, Any], pdfs: list[tuple[str, bytes]], model: str = ""
+) -> dict[str, Any]:
     """POST many resumes to the backend ``/batch`` endpoint."""
     files = [("resumes", (name, content, "application/pdf")) for name, content in pdfs]
-    data = {"jd_json": json.dumps(jd)}
+    data = {"jd_json": json.dumps(jd), "model": model}
     resp = httpx.post(f"{api_url}/batch", data=data, files=files, timeout=REQUEST_TIMEOUT_SECONDS)
     resp.raise_for_status()
     return resp.json()
@@ -366,7 +369,7 @@ def call_batch(api_url: str, jd: dict[str, Any], pdfs: list[tuple[str, bytes]]) 
 # --- Tab 1: Single screen ----------------------------------------------------
 
 
-def tab_single(api_url: str) -> None:
+def tab_single(api_url: str, model: str = "") -> None:
     """Render the single-resume screening tab."""
     st.markdown("### Screen one resume against a JD")
     jd = render_jd_form("single")
@@ -388,7 +391,7 @@ def tab_single(api_url: str) -> None:
     pdf_bytes = resume_file.getvalue()
     with st.spinner(f"Screening {resume_file.name}…"):
         try:
-            result = call_screen(api_url, jd, pdf_bytes, resume_file.name)
+            result = call_screen(api_url, jd, pdf_bytes, resume_file.name, model=model)
         except httpx.HTTPStatusError as exc:
             st.error(f"Backend error {exc.response.status_code}: {exc.response.text}")
             return
@@ -403,7 +406,7 @@ def tab_single(api_url: str) -> None:
 # --- Tab 2: Batch screen -----------------------------------------------------
 
 
-def tab_batch(api_url: str) -> None:
+def tab_batch(api_url: str, model: str = "") -> None:
     """Render the batch screening tab."""
     st.markdown(f"### Batch screen up to {MAX_BATCH_UI} resumes")
     jd = render_jd_form("batch")
@@ -428,7 +431,7 @@ def tab_batch(api_url: str) -> None:
     pdfs = [(f.name, f.getvalue()) for f in resume_files]
     with st.spinner(f"Screening {len(pdfs)} resumes (this may take a minute)…"):
         try:
-            result = call_batch(api_url, jd, pdfs)
+            result = call_batch(api_url, jd, pdfs, model=model)
         except httpx.HTTPStatusError as exc:
             st.error(f"Backend error {exc.response.status_code}: {exc.response.text}")
             return
@@ -564,7 +567,7 @@ def _full_csv(candidates: list[dict[str, Any]]) -> pd.DataFrame:
 
 def main() -> None:
     """Streamlit entrypoint — mounts the sidebar and the two tabs."""
-    api_url, _model = render_sidebar()
+    api_url, model = render_sidebar()
 
     st.title(":briefcase: RecruitSense")
     st.caption(
@@ -574,9 +577,9 @@ def main() -> None:
 
     tab1, tab2 = st.tabs([":mag: Single Screen", ":bar_chart: Batch Screening"])
     with tab1:
-        tab_single(api_url)
+        tab_single(api_url, model=model)
     with tab2:
-        tab_batch(api_url)
+        tab_batch(api_url, model=model)
 
 
 if __name__ == "__main__":
