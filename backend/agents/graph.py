@@ -7,8 +7,7 @@ Topology::
            └─────► bias ────┘
 """
 
-from __future__ import annotations
-
+import asyncio
 from typing import TypedDict
 
 from langgraph.graph import END, StateGraph
@@ -24,8 +23,7 @@ logger = get_logger(__name__)
 
 
 class GraphState(TypedDict, total=False):
-    """Channel state flowing through the pipeline. ``total=False`` so each node
-    can write its slice without having to populate the whole dict."""
+    """Shared state threaded through each pipeline node."""
 
     jd: JDInput
     resume_text: str
@@ -36,8 +34,6 @@ class GraphState(TypedDict, total=False):
 
 
 # --- Nodes --------------------------------------------------------------------
-
-
 async def _parse_node(state: GraphState) -> dict[str, ParsedResume]:
     parsed = await parse_resume(state["resume_text"])
     return {"parsed_resume": parsed}
@@ -63,8 +59,6 @@ async def _score_node(state: GraphState) -> dict[str, ScoreOutput]:
 
 
 # --- Graph builder ------------------------------------------------------------
-
-
 _compiled_graph = None
 
 
@@ -92,21 +86,14 @@ def build_graph():
 
 
 # --- Direct-call entry point (preferred for batch fan-out) -------------------
-
-
-async def run_pipeline(jd: JDInput, resume_text: str) -> ScoreOutput:
+async def run_pipeline(jd: JDInput, resume_text: str, model: str = "") -> ScoreOutput:
     """Run the full screening pipeline for a single resume.
 
-    Used by both the LangGraph-driven ``/screen`` route and the batch route's
-    ``asyncio.gather`` fan-out. Calls agents directly (without going through
-    LangGraph) to avoid graph-runtime overhead per resume — the DAG is still
-    used by ``/screen`` to expose a clean visualization-ready structure.
+    Calls agents directly (bypassing LangGraph graph overhead) so it works
+    efficiently in both single-screen and batch fan-out contexts.
     """
     parsed = await parse_resume(resume_text)
-    # Run RAG retrieval and bias detection concurrently.
-    import asyncio as _asyncio
-
-    rag_task = _asyncio.create_task(retrieve_context(jd, parsed))
+    rag_task = asyncio.create_task(retrieve_context(jd, parsed))
     bias_flags = detect_bias_signals(resume_text)
     rag_context, _ = await rag_task
     return await score_resume(
@@ -114,4 +101,5 @@ async def run_pipeline(jd: JDInput, resume_text: str) -> ScoreOutput:
         parsed_resume=parsed,
         rag_context=rag_context,
         bias_flags=bias_flags,
+        model=model,
     )

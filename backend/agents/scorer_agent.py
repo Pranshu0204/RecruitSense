@@ -1,11 +1,15 @@
-from __future__ import annotations
+"""Scorer agent — LLM-based resume scoring against a JD using RAG context.
+
+Calls the scorer LLM (Redis-cached), strips the chain-of-thought block, validates
+the JSON response, computes the weighted composite, and attaches pre-computed bias
+flags to the output without passing them to the model.
+"""
 
 import json
 import re
 from typing import Any
 
-from backend.agents import get_llm
-from backend.core.config import get_settings
+from backend.agents import get_llm, resolve_model
 from backend.core.prompts import SCORER_PROMPT
 from backend.core.schemas import (
     DIMENSION_NAMES,
@@ -21,8 +25,6 @@ from backend.utils.logger import get_logger
 from backend.utils.redis_cache import cache_llm
 
 logger = get_logger(__name__)
-
-
 # --- Output cleaning ----------------------------------------------------------
 
 _THINKING_BLOCK = re.compile(r"<thinking>.*?</thinking>", re.DOTALL | re.IGNORECASE)
@@ -60,16 +62,15 @@ def _extract_first_json_object(text: str) -> str:
 
 
 # --- LLM call -----------------------------------------------------------------
-
-
 @cache_llm(namespace="scorer")
 async def _scorer_llm_call(
     jd_dict: dict[str, Any],
     parsed_resume_dict: dict[str, Any],
     rag_context: str,
+    model: str = "",
 ) -> dict[str, Any]:
     """Cached scorer LLM call. Returns the parsed JSON object (raises on failure)."""
-    llm = get_llm()
+    llm = get_llm(model=model or None)
     prompt = SCORER_PROMPT.format_messages(
         job_title=jd_dict["job_title"],
         company=jd_dict.get("company", ""),
@@ -89,8 +90,6 @@ async def _scorer_llm_call(
 
 
 # --- Fallback construction ----------------------------------------------------
-
-
 def _make_fallback_score(
     candidate_name: str, model_used: str, error: str, bias_flags: list[str] | None = None
 ) -> ScoreOutput:
@@ -117,26 +116,26 @@ def _make_fallback_score(
 
 
 # --- Public entry point -------------------------------------------------------
-
-
 async def score_resume(
     jd: JDInput,
     parsed_resume: ParsedResume,
     rag_context: str = "",
     bias_flags: list[str] | None = None,
+    model: str = "",
 ) -> ScoreOutput:
     """Score a parsed resume against a JD and return a ``ScoreOutput``.
 
     ``bias_flags`` are passed through to the output but never sent to the LLM —
     bias signals must never influence the score.
     """
-    model_used = get_settings().default_model
+    model_used = resolve_model(model)
 
     try:
         raw = await _scorer_llm_call(
             jd.model_dump(mode="json"),
             parsed_resume.model_dump(mode="json"),
             rag_context,
+            model_used,
         )
     except Exception as exc:
         logger.warning("scorer_llm_failed", reason=str(exc))
