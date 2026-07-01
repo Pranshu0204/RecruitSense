@@ -1,4 +1,4 @@
-.PHONY: install install-frontend install-finetune ingest run frontend finetune evaluate test lint format docker-up docker-down infra stop clean
+.PHONY: install install-frontend install-finetune ingest run frontend finetune evaluate evaluate-rag test lint format docker-up docker-down infra stop clean
 
 install:
 	pip install -r backend/requirements.txt
@@ -23,6 +23,9 @@ finetune:
 
 evaluate:
 	python -m finetune.evaluate
+
+evaluate-rag:
+	python -m backend.rag.evaluate_rag
 
 test:
 	pytest tests/ -v

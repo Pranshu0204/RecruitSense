@@ -145,9 +145,17 @@ class BatchResult(BaseModel):
 
 
 # --- Helpers ------------------------------------------------------------------
-def composite_from_dimensions(dim_scores: dict[str, DimensionScore]) -> float:
-    """Compute the 0-100 composite from per-dimension 0-10 scores using fixed weights."""
-    weighted = sum(dim_scores[name].score * weight for name, weight in DIMENSION_WEIGHTS.items())
+def composite_from_dimensions(
+    dim_scores: dict[str, DimensionScore],
+    weight_overrides: dict[str, float] | None = None,
+) -> float:
+    """Compute the 0-100 composite from per-dimension 0-10 scores.
+
+    Pass ``weight_overrides`` (must cover all five dimensions and sum to 1.0)
+    to recompute with custom weights without re-invoking the LLM.
+    """
+    weights = weight_overrides if weight_overrides is not None else DIMENSION_WEIGHTS
+    weighted = sum(dim_scores[name].score * weights[name] for name in DIMENSION_NAMES)
     return round(weighted * 10.0, 2)
 
 
@@ -160,6 +168,61 @@ def tier_from_composite(score: float) -> Tier:
     if score >= 55:
         return Tier.C
     return Tier.D
+
+
+# --- Session schemas (stateful LangGraph turns) ------------------------------
+
+
+class SessionScreenResponse(BaseModel):
+    """Returned by Turn 1 (/session/screen) — score plus the session_id needed for Turns 2 & 3."""
+
+    session_id: str
+    score: ScoreOutput
+
+
+class ReweightRequest(BaseModel):
+    """Body for Turn 2 (/session/{id}/reweight) — full set of dimension weights."""
+
+    weight_overrides: dict[str, float]
+
+    @model_validator(mode="after")
+    def _validate_weights(self) -> "ReweightRequest":
+        invalid = set(self.weight_overrides) - set(DIMENSION_NAMES)
+        if invalid:
+            raise ValueError(f"Unknown dimensions: {sorted(invalid)}")
+        missing = set(DIMENSION_NAMES) - set(self.weight_overrides)
+        if missing:
+            raise ValueError(f"Missing dimensions: {sorted(missing)}")
+        total = sum(self.weight_overrides.values())
+        if abs(total - 1.0) > 0.01:
+            raise ValueError(f"Weights must sum to 1.0, got {total:.3f}")
+        return self
+
+
+class DimensionComparison(BaseModel):
+    """Per-dimension winner between two candidates."""
+
+    candidate_a_score: float
+    candidate_b_score: float
+    winner: str
+    delta: float
+
+
+class CompareRequest(BaseModel):
+    """Body for Turn 3 (/session/compare) — two session IDs to compare."""
+
+    session_id_a: str
+    session_id_b: str
+
+
+class CompareResponse(BaseModel):
+    """Side-by-side comparison of two saved screening sessions."""
+
+    candidate_a: ScoreOutput
+    candidate_b: ScoreOutput
+    overall_winner: str
+    score_delta: float
+    dimension_comparison: dict[str, DimensionComparison]
 
 
 def action_from_tier(tier: Tier) -> RecommendedAction:

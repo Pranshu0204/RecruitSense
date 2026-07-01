@@ -11,6 +11,8 @@ The UI is purely a thin client over the FastAPI backend. Configure the API
 base URL in the sidebar; defaults to ``http://localhost:8000``.
 """
 
+from __future__ import annotations
+
 import io
 import json
 import os
@@ -366,6 +368,43 @@ def call_batch(
     return resp.json()
 
 
+def call_session_screen(
+    api_url: str, jd: dict[str, Any], pdf_bytes: bytes, filename: str, model: str = ""
+) -> dict[str, Any]:
+    """Turn 1 — POST to ``/session/screen``; returns ``{session_id, score}``."""
+    files = {"resume": (filename, pdf_bytes, "application/pdf")}
+    data = {"jd_json": json.dumps(jd), "model": model}
+    resp = httpx.post(
+        f"{api_url}/session/screen", data=data, files=files, timeout=REQUEST_TIMEOUT_SECONDS
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def call_session_reweight(
+    api_url: str, session_id: str, weight_overrides: dict[str, float]
+) -> dict[str, Any]:
+    """Turn 2 — POST to ``/session/{id}/reweight``; returns an updated ``ScoreOutput``."""
+    resp = httpx.post(
+        f"{api_url}/session/{session_id}/reweight",
+        json={"weight_overrides": weight_overrides},
+        timeout=30.0,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def call_session_compare(api_url: str, session_id_a: str, session_id_b: str) -> dict[str, Any]:
+    """Turn 3 — POST to ``/session/compare``; returns a ``CompareResponse``."""
+    resp = httpx.post(
+        f"{api_url}/session/compare",
+        json={"session_id_a": session_id_a, "session_id_b": session_id_b},
+        timeout=30.0,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
 # --- Tab 1: Single screen ----------------------------------------------------
 
 
@@ -562,11 +601,264 @@ def _full_csv(candidates: list[dict[str, Any]]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# --- Tab 3: Sessions (stateful LangGraph) ------------------------------------
+
+
+def tab_session(api_url: str, model: str = "") -> None:
+    """Render the stateful session tab — Turn 1 screen, Turn 2 reweight, Turn 3 compare.
+
+    Screened candidates are kept in ``st.session_state['sessions']`` so their
+    backend ``session_id`` survives Streamlit reruns and can be reused for
+    reweighting and comparison without re-uploading any resume.
+    """
+    st.markdown("### Stateful screening sessions")
+    st.caption(
+        "Demonstrates LangGraph's checkpointed state. Screen a candidate once (Turn 1), "
+        "then reweight or compare with **no further LLM calls** — the dimension scores "
+        "are read back from the saved graph state."
+    )
+
+    if "sessions" not in st.session_state:
+        st.session_state["sessions"] = []  # list of {session_id, candidate_name, score}
+
+    turn1, turn2, turn3 = st.tabs(["1️⃣ Screen (saves state)", "2️⃣ Reweight", "3️⃣ Compare"])
+
+    with turn1:
+        _session_turn1(api_url, model)
+    with turn2:
+        _session_turn2(api_url)
+    with turn3:
+        _session_turn3(api_url)
+
+
+def _session_label(s: dict[str, Any]) -> str:
+    """Human-readable dropdown label for a saved session."""
+    score = s["score"]
+    short_id = s["session_id"][:8]
+    return f"{s['candidate_name']} — Tier {score.get('tier', '?')} ({short_id})"
+
+
+def _session_turn1(api_url: str, model: str) -> None:
+    """Turn 1 — run the full pipeline and persist state under a session_id."""
+    jd = render_jd_form("session")
+    resume_file = st.file_uploader(
+        "Resume PDF *",
+        type=["pdf"],
+        accept_multiple_files=False,
+        key="session_resume",
+    )
+
+    if jd is None:
+        return
+    if resume_file is None:
+        st.error("Please upload a resume PDF before clicking Screen.")
+        return
+
+    pdf_bytes = resume_file.getvalue()
+    with st.spinner(f"Screening {resume_file.name} and saving session…"):
+        try:
+            payload = call_session_screen(api_url, jd, pdf_bytes, resume_file.name, model=model)
+        except httpx.HTTPStatusError as exc:
+            st.error(f"Backend error {exc.response.status_code}: {exc.response.text}")
+            return
+        except Exception as exc:
+            st.error(f"Request failed: {exc}")
+            return
+
+    session_id = payload["session_id"]
+    score = payload["score"]
+    st.session_state["sessions"].append(
+        {
+            "session_id": session_id,
+            "candidate_name": score.get("candidate_name", "Unknown"),
+            "score": score,
+        }
+    )
+    st.success(f"Session saved — `{session_id}`. Now available in Reweight and Compare tabs.")
+    render_score(score)
+
+
+def _session_turn2(api_url: str) -> None:
+    """Turn 2 — recompute the composite with custom weights (no LLM call)."""
+    sessions = st.session_state["sessions"]
+    if not sessions:
+        st.info("No saved sessions yet. Screen a candidate in Turn 1 first.")
+        return
+
+    idx = st.selectbox(
+        "Select a saved session to reweight",
+        options=list(range(len(sessions))),
+        format_func=lambda i: _session_label(sessions[i]),
+        key="reweight_pick",
+    )
+    chosen = sessions[idx]
+
+    st.markdown("##### Adjust dimension weights")
+    st.caption("Weights are normalized to sum to 1.0 before being sent to the backend.")
+
+    defaults = {
+        "skills_match": 35,
+        "experience_relevance": 30,
+        "education_and_certs": 15,
+        "project_impact": 10,
+        "communication_and_polish": 10,
+    }
+    raw_weights: dict[str, int] = {}
+    cols = st.columns(len(defaults))
+    for col, (dim, default) in zip(cols, defaults.items(), strict=True):
+        with col:
+            raw_weights[dim] = st.slider(
+                DIMENSION_LABELS[dim].split(" (")[0],
+                min_value=0,
+                max_value=100,
+                value=default,
+                step=5,
+                key=f"rw_{dim}",
+            )
+
+    total = sum(raw_weights.values())
+    if total == 0:
+        st.error("At least one weight must be greater than zero.")
+        return
+
+    normalized = {dim: round(v / total, 4) for dim, v in raw_weights.items()}
+    # Correct any rounding drift so the sum is exactly 1.0.
+    drift = round(1.0 - sum(normalized.values()), 4)
+    first_dim = next(iter(normalized))
+    normalized[first_dim] = round(normalized[first_dim] + drift, 4)
+
+    st.caption(
+        "Normalized weights sent to backend: "
+        + ", ".join(f"{dim}={w:.2f}" for dim, w in normalized.items())
+    )
+
+    if st.button("Recompute score", type="primary", key="reweight_btn"):
+        with st.spinner("Recomputing from saved state (no LLM call)…"):
+            try:
+                updated = call_session_reweight(api_url, chosen["session_id"], normalized)
+            except httpx.HTTPStatusError as exc:
+                st.error(f"Backend error {exc.response.status_code}: {exc.response.text}")
+                return
+            except Exception as exc:
+                st.error(f"Request failed: {exc}")
+                return
+
+        old = chosen["score"]
+        c1, c2 = st.columns(2)
+        c1.metric(
+            "Original composite",
+            f"{old.get('composite_score', 0):.1f}",
+            help=f"Tier {old.get('tier')}",
+        )
+        c2.metric(
+            "Reweighted composite",
+            f"{updated.get('composite_score', 0):.1f}",
+            delta=round(updated.get("composite_score", 0) - old.get("composite_score", 0), 1),
+            help=f"Tier {updated.get('tier')}",
+        )
+        st.divider()
+        render_score(updated)
+
+
+def _session_turn3(api_url: str) -> None:
+    """Turn 3 — compare two saved sessions side by side (no LLM call)."""
+    sessions = st.session_state["sessions"]
+    if len(sessions) < 2:
+        st.info("Need at least two saved sessions to compare. Screen another candidate in Turn 1.")
+        return
+
+    c1, c2 = st.columns(2)
+    with c1:
+        idx_a = st.selectbox(
+            "Candidate A",
+            options=list(range(len(sessions))),
+            format_func=lambda i: _session_label(sessions[i]),
+            key="cmp_a",
+        )
+    with c2:
+        idx_b = st.selectbox(
+            "Candidate B",
+            options=list(range(len(sessions))),
+            format_func=lambda i: _session_label(sessions[i]),
+            index=1,
+            key="cmp_b",
+        )
+
+    if idx_a == idx_b:
+        st.warning("Select two different candidates.")
+        return
+
+    if st.button("Compare", type="primary", key="compare_btn"):
+        with st.spinner("Comparing saved states (no LLM call)…"):
+            try:
+                cmp = call_session_compare(
+                    api_url, sessions[idx_a]["session_id"], sessions[idx_b]["session_id"]
+                )
+            except httpx.HTTPStatusError as exc:
+                st.error(f"Backend error {exc.response.status_code}: {exc.response.text}")
+                return
+            except Exception as exc:
+                st.error(f"Request failed: {exc}")
+                return
+
+        _render_comparison(cmp)
+
+
+def _render_comparison(cmp: dict[str, Any]) -> None:
+    """Render a ``CompareResponse`` — winner banner, score delta, per-dimension table."""
+    a = cmp["candidate_a"]
+    b = cmp["candidate_b"]
+    winner = cmp.get("overall_winner", "tie")
+    delta = cmp.get("score_delta", 0.0)
+
+    if winner == "tie":
+        st.info(f"**Tie** — both candidates scored {a.get('composite_score', 0):.1f}.")
+    else:
+        st.success(f"**Overall winner: {winner}** (composite delta {abs(delta):.1f} points)")
+
+    c1, c2 = st.columns(2)
+    c1.metric(
+        a.get("candidate_name", "A"),
+        f"{a.get('composite_score', 0):.1f}",
+        help=f"Tier {a.get('tier')}",
+    )
+    c2.metric(
+        b.get("candidate_name", "B"),
+        f"{b.get('composite_score', 0):.1f}",
+        help=f"Tier {b.get('tier')}",
+    )
+
+    st.markdown("##### Per-dimension comparison")
+    rows = []
+    for dim, comp in cmp.get("dimension_comparison", {}).items():
+        win = comp.get("winner", "tie")
+        win_name = (
+            a.get("candidate_name", "A")
+            if win == "A"
+            else (b.get("candidate_name", "B") if win == "B" else "tie")
+        )
+        rows.append(
+            {
+                "Dimension": DIMENSION_LABELS.get(dim, dim).split(" (")[0],
+                a.get("candidate_name", "A"): comp.get("candidate_a_score", 0.0),
+                b.get("candidate_name", "B"): comp.get("candidate_b_score", 0.0),
+                "Winner": win_name,
+                "Δ": comp.get("delta", 0.0),
+            }
+        )
+    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+
+    with st.expander("Full detail — Candidate A", expanded=False):
+        render_score(a)
+    with st.expander("Full detail — Candidate B", expanded=False):
+        render_score(b)
+
+
 # --- Main --------------------------------------------------------------------
 
 
 def main() -> None:
-    """Streamlit entrypoint — mounts the sidebar and the two tabs."""
+    """Streamlit entrypoint — mounts the sidebar and the three tabs."""
     api_url, model = render_sidebar()
 
     st.title(":briefcase: RecruitSense")
@@ -575,11 +867,15 @@ def main() -> None:
         "LangGraph multi-agent orchestration, and bias detection."
     )
 
-    tab1, tab2 = st.tabs([":mag: Single Screen", ":bar_chart: Batch Screening"])
+    tab1, tab2, tab3 = st.tabs(
+        [":mag: Single Screen", ":bar_chart: Batch Screening", ":repeat: Sessions"]
+    )
     with tab1:
         tab_single(api_url, model=model)
     with tab2:
         tab_batch(api_url, model=model)
+    with tab3:
+        tab_session(api_url, model=model)
 
 
 if __name__ == "__main__":

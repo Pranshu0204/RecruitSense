@@ -18,7 +18,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.api.routes import batch, health, screen
+from backend.api.routes import batch, health, screen, session
 from backend.core.config import get_settings
 from backend.utils.logger import get_logger
 
@@ -94,6 +94,7 @@ async def log_requests(request: Request, call_next):
 app.include_router(health.router, tags=["health"])
 app.include_router(screen.router, tags=["screening"])
 app.include_router(batch.router, tags=["screening"])
+app.include_router(session.router)
 
 
 @app.get("/", include_in_schema=False)
